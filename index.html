@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TapMate Field Log</title>
+<style>
+  :root{
+    --ink:#12100e;
+    --paper:#f7f4ee;
+    --card:#ffffff;
+    --line:#e4ded2;
+    --accent:#1f6f4a;      /* tap-plate green */
+    --accent-dark:#164e35;
+    --amber:#c47a1a;
+    --muted:#7a7266;
+    --danger:#a83232;
+    --shadow:0 1px 2px rgba(18,16,14,.06),0 8px 24px rgba(18,16,14,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  body{padding-bottom:120px}
+  header{
+    position:sticky;top:0;z-index:20;
+    background:var(--accent);color:#fff;
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 14px;
+    display:flex;align-items:center;justify-content:space-between}
+  header .brand{font-weight:800;letter-spacing:-.02em;font-size:19px}
+  header .brand span{opacity:.7;font-weight:600}
+  header .count{font-size:12px;background:rgba(255,255,255,.18);
+    padding:5px 10px;border-radius:20px;font-weight:600}
+  .wrap{padding:16px}
+
+  /* Capture card */
+  .capture{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+  .capture h2{margin:0 0 4px;font-size:15px;letter-spacing:-.01em}
+  .capture p.hint{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.5}
+
+  .micbtn{
+    width:100%;border:none;border-radius:16px;cursor:pointer;
+    background:var(--accent);color:#fff;font-size:17px;font-weight:700;
+    padding:22px;display:flex;align-items:center;justify-content:center;gap:12px;
+    transition:transform .08s ease, background .2s ease}
+  .micbtn:active{transform:scale(.985)}
+  .micbtn.recording{background:var(--danger)}
+  .micbtn .dot{width:12px;height:12px;border-radius:50%;background:#fff}
+  .micbtn.recording .dot{animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.4)}}
+
+  .transcript{
+    margin-top:14px;font-size:14px;line-height:1.55;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;min-height:20px;display:none}
+  .transcript.show{display:block}
+  .transcript .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--muted);font-weight:700;margin-bottom:5px}
+
+  /* Parsed fields */
+  .fields{margin-top:14px;display:none}
+  .fields.show{display:block}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:5px}
+  .field input,.field textarea,.field select{
+    width:100%;border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;font-size:15px;background:var(--paper);color:var(--ink);
+    font-family:inherit}
+  .field textarea{resize:none;min-height:52px}
+  .field.two{display:flex;gap:10px}
+  .field.two > div{flex:1}
+  .actionrow{display:flex;gap:10px;margin-top:6px}
+  .actionrow button{flex:1;border:none;border-radius:12px;padding:15px;
+    font-size:15px;font-weight:700;cursor:pointer}
+  .save{background:var(--accent);color:#fff}
+  .save:active{background:var(--accent-dark)}
+  .clear{background:var(--card);color:var(--muted);border:1px solid var(--line) !important}
+
+  .manual-toggle{display:block;width:100%;text-align:center;margin-top:12px;
+    background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;
+    cursor:pointer;padding:6px}
+
+  /* Follow-up chips */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .chip{border:1px solid var(--line);background:var(--paper);border-radius:20px;
+    padding:8px 13px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* List */
+  .listhead{display:flex;align-items:center;justify-content:space-between;
+    margin:22px 4px 10px}
+  .listhead h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted)}
+  .listhead .exp{font-size:12.5px;font-weight:700;color:var(--accent);
+    background:none;border:none;cursor:pointer;padding:4px}
+
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px;margin-bottom:10px;box-shadow:var(--shadow);position:relative}
+  .lead.due{border-left:4px solid var(--amber)}
+  .lead.overdue{border-left:4px solid var(--danger)}
+  .lead .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .lead .biz{font-weight:800;font-size:16px;letter-spacing:-.01em}
+  .lead .town{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .lead .when{font-size:11px;font-weight:700;padding:4px 8px;border-radius:16px;
+    white-space:nowrap;background:var(--paper);color:var(--muted)}
+  .lead .when.due{background:#f6e9d2;color:var(--amber)}
+  .lead .when.overdue{background:#f4dada;color:var(--danger)}
+  .lead .meta{font-size:13px;color:var(--ink);margin-top:8px;line-height:1.5}
+  .lead .meta b{font-weight:700}
+  .lead .said{font-size:13px;color:var(--muted);margin-top:6px;font-style:italic}
+  .lead .next{font-size:13px;margin-top:8px;font-weight:600;color:var(--accent-dark)}
+  .lead .rowbtns{display:flex;gap:8px;margin-top:12px}
+  .lead .rowbtns a,.lead .rowbtns button{
+    flex:1;text-align:center;text-decoration:none;border:1px solid var(--line);
+    background:var(--paper);border-radius:10px;padding:9px;font-size:12.5px;
+    font-weight:700;color:var(--ink);cursor:pointer;display:flex;
+    align-items:center;justify-content:center;gap:5px}
+  .lead .rowbtns .done{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .empty{text-align:center;color:var(--muted);font-size:13.5px;padding:30px 10px;
+    line-height:1.6}
+
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-size:14px;
+    font-weight:600;opacity:0;transition:all .28s ease;z-index:60;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .reminder-banner{background:var(--amber);color:#fff;padding:11px 16px;font-size:13px;
+    font-weight:600;display:none;align-items:center;gap:8px}
+  .reminder-banner.show{display:flex}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">TapMate <span>Field Log</span></div>
+  <div class="count" id="count">0 leads</div>
+</header>
+
+<div class="reminder-banner" id="reminderBanner"></div>
+
+<div class="wrap">
+  <div class="capture">
+    <h2>Just left a business? Talk it in.</h2>
+    <p class="hint">Tap the button, then say it naturally — e.g. "Spoke to Sarah, the owner at Blades Barbers on Fleet Road, interested but wants to think about it, number oh seven seven..., chase her Thursday." Tap again to stop. It fills the form for you.</p>
+
+    <button class="micbtn" id="micbtn">
+      <span class="dot"></span>
+      <span id="micLabel">Hold nothing — just tap to talk</span>
+    </button>
+
+    <div class="transcript" id="transcript">
+      <div class="lbl">What I heard</div>
+      <div id="transcriptText"></div>
+    </div>
+
+    <button class="manual-toggle" id="manualToggle">or type it manually →</button>
+
+    <div class="fields" id="fields">
+      <div class="field">
+        <label>Business name</label>
+        <input id="f_biz" placeholder="Blades Barbers">
+      </div>
+      <div class="field two">
+        <div>
+          <label>Town / location</label>
+          <input id="f_town" placeholder="Feltham">
+        </div>
+        <div>
+          <label>Contact number</label>
+          <input id="f_phone" inputmode="tel" placeholder="07…">
+        </div>
+      </div>
+      <div class="field two">
+        <div>
+          <label>Who I spoke to</label>
+          <input id="f_spoke" placeholder="Sarah">
+        </div>
+        <div>
+          <label>Owner / decision-maker</label>
+          <input id="f_owner" placeholder="Sarah (owner)">
+        </div>
+      </div>
+      <div class="field">
+        <label>What they said / objection</label>
+        <textarea id="f_said" placeholder="Interested, wants to think about it"></textarea>
+      </div>
+      <div class="field">
+        <label>My next action</label>
+        <input id="f_next" placeholder="Follow up, send Instagram">
+      </div>
+      <div class="field">
+        <label>Follow-up channel</label>
+        <div class="chips" id="chanChips">
+          <div class="chip" data-ch="Call">Call</div>
+          <div class="chip" data-ch="WhatsApp">WhatsApp</div>
+          <div class="chip" data-ch="Instagram">Instagram</div>
+          <div class="chip" data-ch="Email">Email</div>
+          <div class="chip" data-ch="Visit">Visit</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>When to follow up</label>
+        <div class="chips" id="whenChips">
+          <div class="chip" data-days="1">Tomorrow</div>
+          <div class="chip" data-days="2">2 days</div>
+          <div class="chip" data-days="3">Thu-ish (3d)</div>
+          <div class="chip" data-days="7">Next week</div>
+        </div>
+        <input id="f_when" type="date" style="margin-top:8px">
+      </div>
+
+      <div class="actionrow">
+        <button class="clear" id="clearBtn">Clear</button>
+        <button class="save" id="saveBtn">Save lead</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="listhead">
+    <h3>Follow-ups</h3>
+    <button class="exp" id="exportBtn">Export CSV</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const store = {
+  key:'tapmate_leads_v1',
+  all(){ try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]} },
+  save(a){ localStorage.setItem(this.key, JSON.stringify(a)) }
+};
+
+const $ = id => document.getElementById(id);
+let selectedChan = '', selectedDays = null;
+
+/* ---------- Toast ---------- */
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
+}
+
+/* ---------- Speech recognition ---------- */
+let recog=null, recording=false, finalText='';
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(SR){
+  recog = new SR();
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.lang = 'en-GB';
+  recog.onresult = e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const r=e.results[i];
+      if(r.isFinal) finalText += r[0].transcript+' ';
+      else interim += r[0].transcript;
+    }
+    $('transcript').classList.add('show');
+    $('transcriptText').textContent = (finalText+interim).trim();
+  };
+  recog.onend = ()=>{ if(recording){ try{recog.start()}catch(e){} } };
+}
+
+$('micbtn').addEventListener('click', ()=>{
+  if(!SR){
+    toast('Voice not supported here — type it');
+    $('fields').classList.add('show');
+    return;
+  }
+  if(!recording){
+    finalText=''; $('transcriptText').textContent='';
+    try{ recog.start(); }catch(e){}
+    recording=true;
+    $('micbtn').classList.add('recording');
+    $('micLabel').textContent='Listening… tap to stop';
+  } else {
+    recording=false;
+    try{ recog.stop(); }catch(e){}
+    $('micbtn').classList.remove('recording');
+    $('micLabel').textContent='Tap to talk';
+    setTimeout(()=>{ parseTranscript((finalText).trim()); }, 350);
+  }
+});
+
+/* ---------- Lightweight on-device parser ----------
+   This is a heuristic parser so the app works offline with zero cost.
+   For smarter parsing, the transcript can be sent to an AI step in
+   Zapier/Make (see notes below the app).                              */
+function parseTranscript(text){
+  if(!text){ toast('Nothing captured'); return; }
+  $('fields').classList.add('show');
+
+  const t = ' '+text.replace(/\s+/g,' ').trim()+' ';
+  const lower = t.toLowerCase();
+
+  // Business name: "at X Barbers/Salon/Cafe..." or "called X"
+  let biz = grab(t, /\b(?:at|the|called|it'?s called)\s+([A-Z][A-Za-z0-9'&]+(?:\s+[A-Z][A-Za-z0-9'&]+){0,3})\s+(?:barbers?|salon|hair|beauty|cafe|caf[eé]|restaurant|bar|shop|studio|spa|nails?|clinic|garage|bakery)/i);
+  if(!biz){
+    const m = t.match(/\b(?:at|from)\s+([A-Z][A-Za-z0-9'&]+(?:\s+[A-Z][A-Za-z0-9'&]+){0,2})\b/);
+    if(m) biz = m[1];
+  } else {
+    // include the trailing type word
+    const full = t.match(new RegExp(biz.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s+\\w+','i'));
+    if(full) biz = full[0].replace(/^(at|the|called|it'?s called)\s+/i,'').trim();
+  }
+  if(biz) $('f_biz').value = titleCase(biz);
+
+  // Person spoke to: "spoke to X" / "talked to X" / "saw X"
+  let person = grab(t, /\b(?:spoke to|talked to|talked with|spoke with|saw|met)\s+([A-Z][a-z]+)/i);
+  if(person){ $('f_spoke').value = person; }
+
+  // Owner
+  const ownerName = grab(t, /\b([A-Z][a-z]+)\s+(?:the\s+)?owner\b/i) ||
+                    grab(t, /\bowner\s+(?:is|was|named|called)?\s*([A-Z][a-z]+)/i);
+  if(/owner/i.test(lower)){
+    $('f_owner').value = (ownerName||person||'') + ' (owner)';
+  } else if(person){
+    $('f_owner').value = person;
+  }
+
+  // Town: "on X Road/Street/High Street" or "in X"
+  let town = grab(t, /\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
+  const road = grab(t, /\bon\s+([A-Z][a-z]+\s+(?:Road|Street|Lane|Avenue))/i);
+  if(road) town = road;
+  if(town) $('f_town').value = town;
+
+  // Phone
+  const phone = grab(t, /(0\s?7[\d\s]{9,13})/) ||
+                spokenNumber(lower);
+  if(phone) $('f_phone').value = phone.replace(/\s+/g,'');
+
+  // What they said / objection
+  let said = '';
+  if(/think about it|have a think|not sure|maybe later|busy|no thanks|not interested|call back|too expensive|expensive|already have|come back/i.test(lower)){
+    const m = lower.match(/(think about it|have a think|not sure|too expensive|expensive|already have (?:one|something)|not interested|no thanks|call back|come back|busy)/);
+    if(m) said = capitalize(m[1]);
+  }
+  if(/interested|keen|loves? it|likes? it|yes|want/i.test(lower) && !said.includes('not')){
+    said = (said? said+'; ':'') + 'Interested';
+  }
+  $('f_said').value = said || cleanSaid(text);
+
+  // Next action + when
+  if(/instagram|insta|follow them|follow him|follow her/i.test(lower)){
+    selChan('Instagram'); $('f_next').value='Send / follow on Instagram';
+  } else if(/whatsapp/i.test(lower)){ selChan('WhatsApp'); $('f_next').value='WhatsApp them'; }
+  else if(/email/i.test(lower)){ selChan('Email'); $('f_next').value='Email them'; }
+  else if(/call|ring|phone/i.test(lower)){ selChan('Call'); $('f_next').value='Call them'; }
+  else if(/pop back|go back|visit|come back/i.test(lower)){ selChan('Visit'); $('f_next').value='Pop back in'; }
+
+  // When
+  let days=null;
+  if(/tomorrow/i.test(lower)) days=1;
+  else if(/monday/i.test(lower)) days=nextDow(1);
+  else if(/tuesday/i.test(lower)) days=nextDow(2);
+  else if(/wednesday/i.test(lower)) days=nextDow(3);
+  else if(/thursday/i.test(lower)) days=nextDow(4);
+  else if(/friday/i.test(lower)) days=nextDow(5);
+  else if(/next week/i.test(lower)) days=7;
+  else if(/couple of days|two days|few days/i.test(lower)) days=2;
+  if(days!=null){ setWhenDays(days); }
+
+  toast('Filled in — check & save');
+}
+
+function grab(t, re){ const m=t.match(re); return m? m[1].trim():''; }
+function titleCase(s){ return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1)); }
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function cleanSaid(s){ return s.length>90? s.slice(0,90)+'…':s; }
+function spokenNumber(){ return ''; }
+
+/* ---------- Chips ---------- */
+document.querySelectorAll('#chanChips .chip').forEach(c=>{
+  c.addEventListener('click',()=>selChan(c.dataset.ch));
+});
+function selChan(ch){
+  selectedChan=ch;
+  document.querySelectorAll('#chanChips .chip').forEach(c=>
+    c.classList.toggle('on', c.dataset.ch===ch));
+}
+document.querySelectorAll('#whenChips .chip').forEach(c=>{
+  c.addEventListener('click',()=>setWhenDays(parseInt(c.dataset.days)));
+});
+function setWhenDays(days){
+  selectedDays=days;
+  const d=new Date(); d.setDate(d.getDate()+days);
+  $('f_when').value = d.toISOString().slice(0,10);
+  document.querySelectorAll('#whenChips .chip').forEach(c=>
+    c.classList.toggle('on', parseInt(c.dataset.days)===days));
+}
+function nextDow(target){
+  const now=new Date(); const cur=now.getDay();
+  let diff=(target-cur+7)%7; if(diff===0) diff=7; return diff;
+}
+
+/* ---------- Manual toggle ---------- */
+$('manualToggle').addEventListener('click',()=>{
+  $('fields').classList.toggle('show');
+});
+
+/* ---------- Save ---------- */
+$('saveBtn').addEventListener('click',()=>{
+  const biz=$('f_biz').value.trim();
+  if(!biz){ toast('Add a business name'); $('f_biz').focus(); return; }
+  const lead={
+    id:Date.now(),
+    biz, town:$('f_town').value.trim(),
+    spoke:$('f_spoke').value.trim(),
+    owner:$('f_owner').value.trim(),
+    phone:$('f_phone').value.trim(),
+    said:$('f_said').value.trim(),
+    next:$('f_next').value.trim(),
+    channel:selectedChan,
+    when:$('f_when').value,
+    created:new Date().toISOString(),
+    done:false
+  };
+  const a=store.all(); a.unshift(lead); store.save(a);
+  clearForm(); render(); toast('Saved ✓');
+});
+$('clearBtn').addEventListener('click',clearForm);
+function clearForm(){
+  ['f_biz','f_town','f_spoke','f_owner','f_phone','f_said','f_next','f_when']
+    .forEach(id=>$(id).value='');
+  selectedChan=''; selectedDays=null;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  $('transcript').classList.remove('show');
+  $('transcriptText').textContent='';
+  $('fields').classList.remove('show');
+  $('micLabel').textContent='Tap to talk';
+}
+
+/* ---------- Render list ---------- */
+function fmtWhen(w){
+  if(!w) return {label:'No date',cls:''};
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(w+'T00:00:00');
+  const diff=Math.round((d-today)/86400000);
+  if(diff<0) return {label:'Overdue',cls:'overdue'};
+  if(diff===0) return {label:'Today',cls:'due'};
+  if(diff===1) return {label:'Tomorrow',cls:'due'};
+  if(diff<7) return {label:d.toLocaleDateString('en-GB',{weekday:'short'}),cls:''};
+  return {label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),cls:''};
+}
+function chanLink(l){
+  const p=(l.phone||'').replace(/\D/g,'').replace(/^0/,'44');
+  if(l.channel==='WhatsApp'&&p) return 'https://wa.me/'+p;
+  if(l.channel==='Call'&&l.phone) return 'tel:'+l.phone;
+  if(l.channel==='Email') return 'mailto:';
+  if(l.channel==='Instagram') return 'https://instagram.com';
+  return '';
+}
+function render(){
+  const a=store.all().filter(x=>!x.done);
+  const done=store.all().filter(x=>x.done);
+  $('count').textContent=a.length+' lead'+(a.length===1?'':'s');
+  a.sort((x,y)=>(x.when||'9999').localeCompare(y.when||'9999'));
+
+  const list=$('list');
+  if(a.length===0){
+    list.innerHTML='<div class="empty">No open follow-ups.<br>Talk in your next lead above ↑</div>';
+  } else {
+    list.innerHTML=a.map(l=>{
+      const w=fmtWhen(l.when);
+      const link=chanLink(l);
+      return `<div class="lead ${w.cls}">
+        <div class="top">
+          <div><div class="biz">${esc(l.biz)}</div>
+          <div class="town">${esc(l.town||'')}</div></div>
+          <div class="when ${w.cls}">${w.label}</div>
+        </div>
+        ${l.owner||l.spoke?`<div class="meta"><b>${esc(l.owner||l.spoke)}</b>${l.phone?' · '+esc(l.phone):''}</div>`:''}
+        ${l.said?`<div class="said">"${esc(l.said)}"</div>`:''}
+        ${l.next?`<div class="next">→ ${esc(l.next)}${l.channel?' ('+l.channel+')':''}</div>`:''}
+        <div class="rowbtns">
+          ${link?`<a href="${link}" target="_blank">${l.channel||'Open'}</a>`:''}
+          <button class="done" onclick="markDone(${l.id})">Mark done</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateReminder(a);
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+window.markDone=function(id){
+  const a=store.all(); const l=a.find(x=>x.id===id); if(l)l.done=true;
+  store.save(a); render(); toast('Done ✓');
+};
+
+/* ---------- In-app reminder banner ---------- */
+function updateReminder(open){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const due=open.filter(l=>{
+    if(!l.when) return false;
+    return new Date(l.when+'T00:00:00')<=today;
+  });
+  const b=$('reminderBanner');
+  if(due.length){
+    b.classList.add('show');
+    b.textContent='⏰ '+due.length+' follow-up'+(due.length>1?'s':'')+' due today or overdue';
+  } else b.classList.remove('show');
+}
+
+/* ---------- Export CSV ---------- */
+$('exportBtn').addEventListener('click',()=>{
+  const a=store.all();
+  if(!a.length){ toast('Nothing to export'); return; }
+  const cols=['Business','Town','Spoke to','Owner/DM','Phone','What they said','Next action','Channel','Follow-up date','Logged','Done'];
+  const rows=a.map(l=>[l.biz,l.town,l.spoke,l.owner,l.phone,l.said,l.next,l.channel,l.when,
+    new Date(l.created).toLocaleString('en-GB'),l.done?'Yes':'No']);
+  const csv=[cols,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a2=document.createElement('a');
+  a2.href=url; a2.download='tapmate-leads-'+new Date().toISOString().slice(0,10)+'.csv';
+  a2.click(); URL.revokeObjectURL(url);
+  toast('CSV exported');
+});
+
+render();
+</script>
+</body>
+</html>
