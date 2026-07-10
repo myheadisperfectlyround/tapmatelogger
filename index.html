@@ -196,6 +196,7 @@
         <label>Follow-up channel</label>
         <div class="chips" id="chanChips">
           <div class="chip" data-ch="Call">Call</div>
+          <div class="chip" data-ch="Text">Text</div>
           <div class="chip" data-ch="WhatsApp">WhatsApp</div>
           <div class="chip" data-ch="Instagram">Instagram</div>
           <div class="chip" data-ch="Email">Email</div>
@@ -288,91 +289,134 @@ $('micbtn').addEventListener('click', ()=>{
 });
 
 /* ---------- Lightweight on-device parser ----------
-   This is a heuristic parser so the app works offline with zero cost.
-   For smarter parsing, the transcript can be sent to an AI step in
-   Zapier/Make (see notes below the app).                              */
+   Heuristic parser so the app works offline with zero cost.
+   Strategy: businesses are usually named after a connector
+   ("to / at / with / from") and run UP TO a town marker
+   ("in / on <Town>") or the end of the clause. We grab that
+   whole span rather than expecting a type-word in a fixed spot. */
+
+const BIZ_TYPES = 'barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
+
 function parseTranscript(text){
   if(!text){ toast('Nothing captured'); return; }
   $('fields').classList.add('show');
 
-  const t = ' '+text.replace(/\s+/g,' ').trim()+' ';
+  const raw = text.replace(/\s+/g,' ').trim();
+  const t = ' '+raw+' ';
   const lower = t.toLowerCase();
 
-  // Business name: "at X Barbers/Salon/Cafe..." or "called X"
-  let biz = grab(t, /\b(?:at|the|called|it'?s called)\s+([A-Z][A-Za-z0-9'&]+(?:\s+[A-Z][A-Za-z0-9'&]+){0,3})\s+(?:barbers?|salon|hair|beauty|cafe|caf[eé]|restaurant|bar|shop|studio|spa|nails?|clinic|garage|bakery)/i);
-  if(!biz){
-    const m = t.match(/\b(?:at|from)\s+([A-Z][A-Za-z0-9'&]+(?:\s+[A-Z][A-Za-z0-9'&]+){0,2})\b/);
-    if(m) biz = m[1];
-  } else {
-    // include the trailing type word
-    const full = t.match(new RegExp(biz.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s+\\w+','i'));
-    if(full) biz = full[0].replace(/^(at|the|called|it'?s called)\s+/i,'').trim();
+  /* ---- Business name ---- */
+  // Look for the chunk after a connector, stopping at a town marker,
+  // a comma, "they/she/he", or end. Handles "sold X to North Bay Barbers in Goole".
+  let biz = '';
+  let bizMatch = t.match(/\b(?:spoke to|talked to|talked with|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|went (?:in ?)?to|at|with|for|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
+  if(bizMatch){
+    biz = bizMatch[1].trim();
   }
+  // Fallback: capture a run of Capitalised words that ends in / contains a business type
+  if(!biz || biz.split(' ').length>5){
+    const typed = t.match(new RegExp('((?:[A-Z][A-Za-z0-9\'&]*\\s+){0,4}(?:'+BIZ_TYPES+'))','i'));
+    if(typed) biz = typed[1].trim();
+  }
+  // Clean stray leading verbs the connector regex may have kept
+  biz = biz.replace(/^(?:a|an|the|to|some|get)\s+/i,'').trim();
   if(biz) $('f_biz').value = titleCase(biz);
 
-  // Person spoke to: "spoke to X" / "talked to X" / "saw X"
+  /* ---- Person spoke to ---- */
   let person = grab(t, /\b(?:spoke to|talked to|talked with|spoke with|saw|met)\s+([A-Z][a-z]+)/i);
   if(person){ $('f_spoke').value = person; }
 
-  // Owner
+  /* ---- Owner ---- */
   const ownerName = grab(t, /\b([A-Z][a-z]+)\s+(?:the\s+)?owner\b/i) ||
                     grab(t, /\bowner\s+(?:is|was|named|called)?\s*([A-Z][a-z]+)/i);
-  if(/owner/i.test(lower)){
+  if(/\bowner\b/i.test(lower)){
     $('f_owner').value = (ownerName||person||'') + ' (owner)';
   } else if(person){
     $('f_owner').value = person;
   }
 
-  // Town: "on X Road/Street/High Street" or "in X"
-  let town = grab(t, /\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
-  const road = grab(t, /\bon\s+([A-Z][a-z]+\s+(?:Road|Street|Lane|Avenue))/i);
-  if(road) town = road;
+  /* ---- Town: "in/on <Town>" (skip if it's a business type word) ---- */
+  let town = '';
+  const townM = t.match(/\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
+  if(townM){
+    const cand = townM[1];
+    if(!new RegExp('^(?:'+BIZ_TYPES+')$','i').test(cand)) town = cand;
+  }
   if(town) $('f_town').value = town;
 
-  // Phone
-  const phone = grab(t, /(0\s?7[\d\s]{9,13})/) ||
-                spokenNumber(lower);
-  if(phone) $('f_phone').value = phone.replace(/\s+/g,'');
-
-  // What they said / objection
-  let said = '';
-  if(/think about it|have a think|not sure|maybe later|busy|no thanks|not interested|call back|too expensive|expensive|already have|come back/i.test(lower)){
-    const m = lower.match(/(think about it|have a think|not sure|too expensive|expensive|already have (?:one|something)|not interested|no thanks|call back|come back|busy)/);
-    if(m) said = capitalize(m[1]);
+  /* ---- Phone ---- */
+  const phone = grab(t, /(0\s?7[\d\s]{9,13})/);
+  if(phone){ $('f_phone').value = phone.replace(/\s+/g,''); }
+  else if(/(?:her|his|their|the)\s+number|gave me (?:a|the|her|his)?\s*number/i.test(lower)){
+    $('f_phone').value = ''; // flag: number mentioned but not dictated
+    $('f_phone').placeholder = 'They gave a number — type it';
   }
-  if(/interested|keen|loves? it|likes? it|yes|want/i.test(lower) && !said.includes('not')){
-    said = (said? said+'; ':'') + 'Interested';
+
+  /* ---- What they said / objection: extract SENTIMENT, not the whole line ---- */
+  const signals = [];
+  const objRe = [
+    [/too expensive|bit expensive|pricey/, 'Thinks it\u2019s too expensive'],
+    [/think about it|have a think|need to think/, 'Wants to think about it'],
+    [/not sure/, 'Not sure yet'],
+    [/already (?:have|got)/, 'Says they already have one'],
+    [/not interested|no thanks/, 'Not interested'],
+    [/call back|come back|pop back|another time|catch (?:me|us) later/, 'Come back another time'],
+    [/busy/, 'Was busy'],
+    [/loyalty cards?/, 'Interested in loyalty cards'],
+    [/review plate|google review/, 'Interested in review plate'],
+    [/booking|booksy|fresha/, 'Interested re: booking links']
+  ];
+  objRe.forEach(([re,label])=>{ if(re.test(lower)) signals.push(label); });
+  if(/interested|keen|likes? it|loves? it|want (?:one|it|some)|sold/.test(lower)
+     && !/not interested/.test(lower)){
+    signals.unshift('Interested');
   }
-  $('f_said').value = said || cleanSaid(text);
+  // De-dupe & join
+  const said = [...new Set(signals)].join('; ');
+  $('f_said').value = said; // leave blank rather than dumping the transcript
 
-  // Next action + when
-  if(/instagram|insta|follow them|follow him|follow her/i.test(lower)){
-    selChan('Instagram'); $('f_next').value='Send / follow on Instagram';
-  } else if(/whatsapp/i.test(lower)){ selChan('WhatsApp'); $('f_next').value='WhatsApp them'; }
-  else if(/email/i.test(lower)){ selChan('Email'); $('f_next').value='Email them'; }
-  else if(/call|ring|phone/i.test(lower)){ selChan('Call'); $('f_next').value='Call them'; }
-  else if(/pop back|go back|visit|come back/i.test(lower)){ selChan('Visit'); $('f_next').value='Pop back in'; }
+  /* ---- Follow-up channel + next action (now includes text/message) ---- */
+  let chan='', action='';
+  if(/text|sms|send (?:a|some|over)?\s*(?:message|info|information|details)?\s*(?:via|by)?\s*text|message (?:them )?(?:some|the)?\s*(?:info|information|details)/.test(lower)
+     && !/instagram|whatsapp|insta/.test(lower)){
+    chan='Text'; action='Text over the info';
+  }
+  if(/instagram|insta|dm them|follow them|follow him|follow her/.test(lower)){
+    chan='Instagram'; action='Message on Instagram';
+  } else if(/whatsapp/.test(lower)){ chan='WhatsApp'; action='WhatsApp them'; }
+  else if(/\bemail\b/.test(lower)){ chan='Email'; action='Email over the info'; }
+  else if(/\bcall\b|ring|phone (?:them|her|him)/.test(lower)){ chan='Call'; action='Call them'; }
+  else if(/pop back|go back|visit|come back/.test(lower)){ chan='Visit'; action='Pop back in'; }
+  // generic "send some information" with no channel yet
+  if(!chan && /send (?:over|them)?\s*(?:some )?(?:info|information|details)/.test(lower)){
+    action='Send over some information';
+  }
+  if(chan){ selChan(chan); }
+  if(action){ $('f_next').value = action; }
 
-  // When
+  /* ---- When ---- */
   let days=null;
-  if(/tomorrow/i.test(lower)) days=1;
-  else if(/monday/i.test(lower)) days=nextDow(1);
-  else if(/tuesday/i.test(lower)) days=nextDow(2);
-  else if(/wednesday/i.test(lower)) days=nextDow(3);
-  else if(/thursday/i.test(lower)) days=nextDow(4);
-  else if(/friday/i.test(lower)) days=nextDow(5);
-  else if(/next week/i.test(lower)) days=7;
-  else if(/couple of days|two days|few days/i.test(lower)) days=2;
+  if(/tomorrow/.test(lower)) days=1;
+  else if(/monday/.test(lower)) days=nextDow(1);
+  else if(/tuesday/.test(lower)) days=nextDow(2);
+  else if(/wednesday/.test(lower)) days=nextDow(3);
+  else if(/thursday/.test(lower)) days=nextDow(4);
+  else if(/friday/.test(lower)) days=nextDow(5);
+  else if(/saturday/.test(lower)) days=nextDow(6);
+  else if(/next week/.test(lower)) days=7;
+  else if(/couple of days|two days|few days/.test(lower)) days=2;
   if(days!=null){ setWhenDays(days); }
 
-  toast('Filled in — check & save');
+  // Feedback: tell them what still needs a look
+  const missing=[];
+  if(!$('f_biz').value) missing.push('business');
+  if(!$('f_town').value) missing.push('town');
+  toast(missing.length? 'Filled in \u2014 check '+missing.join(' & ') : 'Filled in \u2014 check & save');
 }
 
 function grab(t, re){ const m=t.match(re); return m? m[1].trim():''; }
 function titleCase(s){ return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1)); }
 function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-function cleanSaid(s){ return s.length>90? s.slice(0,90)+'…':s; }
-function spokenNumber(){ return ''; }
 
 /* ---------- Chips ---------- */
 document.querySelectorAll('#chanChips .chip').forEach(c=>{
@@ -451,6 +495,7 @@ function chanLink(l){
   const p=(l.phone||'').replace(/\D/g,'').replace(/^0/,'44');
   if(l.channel==='WhatsApp'&&p) return 'https://wa.me/'+p;
   if(l.channel==='Call'&&l.phone) return 'tel:'+l.phone;
+  if(l.channel==='Text'&&l.phone) return 'sms:'+l.phone;
   if(l.channel==='Email') return 'mailto:';
   if(l.channel==='Instagram') return 'https://instagram.com';
   return '';
