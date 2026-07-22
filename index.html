@@ -11,218 +11,209 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* pastel / lavender palette */
-    --bg:#eceaf4;
-    --bg2:#e6e9f5;
-    --lav:#c8bff0;
-    --lav-soft:#ded8f7;
-    --blue:#bcd4f6;
-    --mint:#c4ecdd;
-    --peach:#f7d9c9;
-    --ink:#2b2740;
-    --ink-soft:#6b6685;
-    --charcoal:#221f33;
-    --card:rgba(255,255,255,.72);
-    --card-solid:#ffffff;
-    --line:rgba(120,110,160,.14);
+    --bg:#eceaf4; --lav:#c8bff0; --blue:#bcd4f6; --mint:#c4ecdd;
+    --ink:#2b2740; --ink-soft:#6b6685; --charcoal:#221f33;
+    --card:rgba(255,255,255,.72); --card-solid:#fff;
     --glass:rgba(255,255,255,.45);
-    --shadow-soft:0 2px 6px rgba(90,80,140,.06), 0 12px 30px rgba(90,80,140,.10);
-    --shadow-clay:8px 8px 20px rgba(160,150,200,.28), -8px -8px 20px rgba(255,255,255,.9);
-    --r-lg:26px;
-    --r-md:20px;
-    --r-sm:15px;
+    --shadow-soft:0 2px 6px rgba(90,80,140,.06),0 12px 30px rgba(90,80,140,.10);
+    --shadow-clay:8px 8px 20px rgba(160,150,200,.28),-8px -8px 20px rgba(255,255,255,.9);
+    --r-lg:26px; --r-md:20px; --r-sm:15px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
     color:var(--ink);-webkit-font-smoothing:antialiased}
-  body{
-    min-height:100vh;
-    background:
-      radial-gradient(120% 90% at 15% 0%, #e9e3fb 0%, transparent 55%),
-      radial-gradient(120% 90% at 90% 10%, #dce9fb 0%, transparent 50%),
-      radial-gradient(140% 100% at 50% 100%, #dcf2ea 0%, transparent 55%),
-      var(--bg);
-    padding:0 14px 130px;
-  }
+  body{min-height:100vh;padding:0 14px 120px;
+    background:radial-gradient(120% 90% at 15% 0%,#e9e3fb 0%,transparent 55%),
+      radial-gradient(120% 90% at 90% 10%,#dce9fb 0%,transparent 50%),
+      radial-gradient(140% 100% at 50% 100%,#dcf2ea 0%,transparent 55%),var(--bg)}
 
-  /* top bar */
-  .topbar{
-    position:sticky;top:0;z-index:30;
-    padding:calc(env(safe-area-inset-top,0px) + 16px) 4px 12px;
+  .topbar{position:sticky;top:0;z-index:30;
+    padding:calc(env(safe-area-inset-top,0px) + 16px) 4px 10px;
     display:flex;align-items:center;justify-content:space-between;
-    background:linear-gradient(180deg, var(--bg) 55%, rgba(236,234,244,0));
-  }
+    background:linear-gradient(180deg,var(--bg) 55%,rgba(236,234,244,0))}
   .brand{display:flex;align-items:center;gap:11px}
-  .brand .logo{
-    width:42px;height:42px;border-radius:14px;flex:none;
-    background:linear-gradient(140deg,#cabff2,#a9c3f5);
-    box-shadow:var(--shadow-clay);
+  .brand .logo{width:42px;height:42px;border-radius:14px;flex:none;
+    background:linear-gradient(140deg,#cabff2,#a9c3f5);box-shadow:var(--shadow-clay);
     display:flex;align-items:center;justify-content:center}
   .brand .logo svg{width:22px;height:22px}
   .brand h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
   .brand h1 span{color:var(--ink-soft);font-weight:600}
   .brand .sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;font-weight:500}
-  .pill{
-    background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,.6);
-    padding:9px 14px;border-radius:16px;font-size:12.5px;font-weight:700;
-    box-shadow:var(--shadow-soft);color:var(--ink);white-space:nowrap}
+  .pill{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.6);padding:9px 14px;border-radius:16px;
+    font-size:12.5px;font-weight:700;box-shadow:var(--shadow-soft);white-space:nowrap}
 
-  /* bento grid */
+  /* tabs */
+  .tabs{display:flex;gap:7px;margin:4px 0 14px;position:sticky;top:78px;z-index:29;
+    padding:6px;background:var(--glass);backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);
+    border-radius:18px;box-shadow:var(--shadow-soft)}
+  .tab{flex:1;text-align:center;padding:11px 6px;border-radius:13px;font-size:12.5px;
+    font-weight:800;color:var(--ink-soft);cursor:pointer;transition:all .18s ease;
+    display:flex;align-items:center;justify-content:center;gap:6px}
+  .tab.on{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
+    box-shadow:0 4px 12px rgba(40,32,70,.28)}
+  .tab .badge{background:rgba(255,255,255,.22);border-radius:9px;padding:1px 6px;font-size:10.5px}
+  .tab:not(.on) .badge{background:rgba(120,110,160,.15)}
+
+  .view{display:none}.view.on{display:block}
+
   .bento{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .cell{grid-column:span 2}          /* full width by default */
-  .cell.half{grid-column:span 1}
-
-  .card{
-    background:var(--card);
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,.65);
-    border-radius:var(--r-lg);
-    box-shadow:var(--shadow-soft);
-    padding:18px;
-  }
+  .cell{grid-column:span 2}.cell.half{grid-column:span 1}
+  .card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.65);border-radius:var(--r-lg);
+    box-shadow:var(--shadow-soft);padding:18px}
   .card.clay{background:var(--card-solid);box-shadow:var(--shadow-clay);border:none}
-  .card.dark{
-    background:linear-gradient(150deg,#2c2842,#1e1b2e);
-    color:#efeaff;border:none;box-shadow:0 10px 30px rgba(40,32,70,.35)}
-  .card.dark .k{color:#c9c1ec}
-  .card.dark .big{color:#fff}
-
-  .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;
-    font-weight:700;color:var(--ink-soft)}
-
-  /* stat cells */
+  .card.dark{background:linear-gradient(150deg,#2c2842,#1e1b2e);color:#efeaff;border:none;
+    box-shadow:0 10px 30px rgba(40,32,70,.35)}
+  .card.dark .k{color:#c9c1ec}.card.dark .big{color:#fff}
+  .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--ink-soft)}
   .stat .big{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:6px}
   .stat .k{font-size:12px;color:var(--ink-soft);font-weight:600;margin-top:2px}
-  .stat .ic{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;
-    justify-content:center;margin-bottom:2px}
+  .ic{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center}
   .ic.lav{background:linear-gradient(140deg,#d3c9f6,#b9a9f0)}
-  .ic.mint{background:linear-gradient(140deg,#c8efdd,#a5e3c8)}
   .ic svg{width:18px;height:18px}
-  .statrow{display:flex;justify-content:space-between;align-items:flex-start}
 
-  /* capture card */
   h2.title{margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em}
   p.hint{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.55;font-weight:500}
 
-  .micbtn{
-    width:100%;margin-top:16px;border:none;cursor:pointer;
-    border-radius:var(--r-md);
-    background:linear-gradient(140deg,#c6bcf3,#a7c4f6);
-    color:#231f36;font-size:16px;font-weight:800;letter-spacing:-.01em;
-    padding:20px;display:flex;align-items:center;justify-content:center;gap:12px;
+  .micbtn{width:100%;margin-top:16px;border:none;cursor:pointer;border-radius:var(--r-md);
+    background:linear-gradient(140deg,#c6bcf3,#a7c4f6);color:#231f36;font-size:16px;
+    font-weight:800;padding:20px;display:flex;align-items:center;justify-content:center;gap:12px;
     box-shadow:6px 6px 16px rgba(150,140,200,.32),-6px -6px 16px rgba(255,255,255,.85);
-    transition:transform .08s ease, box-shadow .2s ease}
-  .micbtn:active{transform:scale(.98);
-    box-shadow:inset 4px 4px 10px rgba(150,140,200,.4),inset -4px -4px 10px rgba(255,255,255,.6)}
+    transition:transform .08s ease}
+  .micbtn:active{transform:scale(.98)}
   .micbtn.recording{background:linear-gradient(140deg,#f5b7c4,#f0a5a5);color:#4a1f28}
   .micbtn .dot{width:11px;height:11px;border-radius:50%;background:#231f36}
   .micbtn.recording .dot{background:#4a1f28;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
 
-  .transcript{
-    margin-top:14px;font-size:13.5px;line-height:1.55;
-    background:var(--glass);backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.6);border-radius:var(--r-sm);
+  .transcript{margin-top:14px;font-size:13.5px;line-height:1.55;background:var(--glass);
+    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:var(--r-sm);
     padding:13px 15px;display:none}
   .transcript.show{display:block}
   .transcript .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;
     color:var(--ink-soft);font-weight:700;margin-bottom:6px}
+  .manual-toggle{display:block;width:100%;text-align:center;margin-top:13px;background:none;
+    border:none;color:#7a63d6;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px}
 
-  .manual-toggle{display:block;width:100%;text-align:center;margin-top:13px;
-    background:none;border:none;color:#7a63d6;font-size:12.5px;font-weight:700;
-    cursor:pointer;padding:6px}
-
-  /* form fields */
-  .fields{margin-top:4px;display:none}
-  .fields.show{display:block}
+  .fields{margin-top:4px;display:none}.fields.show{display:block}
   .field{margin-bottom:12px}
-  .field label{display:block;font-size:10px;text-transform:uppercase;
-    letter-spacing:.1em;color:var(--ink-soft);font-weight:700;margin-bottom:6px}
-  .field input,.field textarea,.field select{
-    width:100%;border:1px solid rgba(120,110,160,.16);border-radius:var(--r-sm);
-    padding:12px 14px;font-size:15px;background:rgba(255,255,255,.7);color:var(--ink);
-    font-family:inherit;font-weight:500;transition:border .15s ease, box-shadow .15s ease}
+  .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--ink-soft);font-weight:700;margin-bottom:6px}
+  .field input,.field textarea{width:100%;border:1px solid rgba(120,110,160,.16);
+    border-radius:var(--r-sm);padding:12px 14px;font-size:15px;background:rgba(255,255,255,.7);
+    color:var(--ink);font-family:inherit;font-weight:500}
   .field input:focus,.field textarea:focus{outline:none;border-color:#b3a4ec;
     box-shadow:0 0 0 4px rgba(179,164,236,.18)}
   .field textarea{resize:none;min-height:54px}
-  .field.two{display:flex;gap:10px}
-  .field.two > div{flex:1}
+  .field.two{display:flex;gap:10px}.field.two>div{flex:1}
 
   .chips{display:flex;gap:7px;flex-wrap:wrap}
   .chip{border:1px solid rgba(120,110,160,.18);background:rgba(255,255,255,.55);
-    border-radius:14px;padding:9px 13px;font-size:12.5px;font-weight:700;
-    color:var(--ink-soft);cursor:pointer;transition:all .15s ease}
+    border-radius:14px;padding:9px 13px;font-size:12.5px;font-weight:700;color:var(--ink-soft);
+    cursor:pointer;transition:all .15s ease}
   .chip:active{transform:scale(.96)}
-  .chip.on{background:linear-gradient(140deg,#5b4fb0,#7a63d6);color:#fff;
-    border-color:transparent;box-shadow:0 4px 12px rgba(110,90,200,.3)}
+  .chip.on{background:linear-gradient(140deg,#5b4fb0,#7a63d6);color:#fff;border-color:transparent;
+    box-shadow:0 4px 12px rgba(110,90,200,.3)}
   .chip.today.on{background:linear-gradient(140deg,#2c2842,#221f33)}
 
   .actionrow{display:flex;gap:10px;margin-top:8px}
-  .actionrow button{flex:1;border:none;border-radius:var(--r-md);padding:16px;
-    font-size:15px;font-weight:800;cursor:pointer;letter-spacing:-.01em}
-  .save{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
-    box-shadow:0 6px 16px rgba(40,32,70,.3)}
-  .save:active{transform:scale(.985)}
+  .actionrow button{flex:1;border:none;border-radius:var(--r-md);padding:16px;font-size:15px;
+    font-weight:800;cursor:pointer}
+  .save{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;box-shadow:0 6px 16px rgba(40,32,70,.3)}
   .clear{background:rgba(255,255,255,.6);color:var(--ink-soft);
     border:1px solid rgba(120,110,160,.18)!important;flex:.55!important}
 
-  /* section header */
-  .sec{display:flex;align-items:center;justify-content:space-between;margin:22px 6px 12px}
+  .sec{display:flex;align-items:center;justify-content:space-between;margin:20px 6px 12px}
   .sec h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.1em;
     color:var(--ink-soft);font-weight:800}
   .sec .exp{font-size:12px;font-weight:800;color:#7a63d6;background:var(--glass);
-    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);
-    border-radius:12px;padding:7px 13px;cursor:pointer}
+    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:12px;
+    padding:7px 13px;cursor:pointer}
 
-  /* lead cards */
-  .lead{
-    background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,.6);border-radius:var(--r-md);
-    padding:16px;margin-bottom:11px;box-shadow:var(--shadow-soft);position:relative;
-    overflow:hidden}
+  .lead{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.6);border-radius:var(--r-md);padding:16px;margin-bottom:11px;
+    box-shadow:var(--shadow-soft);position:relative;overflow:hidden}
   .lead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
     background:linear-gradient(180deg,#c8bff0,#bcd4f6)}
   .lead.due::before{background:linear-gradient(180deg,#f3d9b8,#eec48f)}
   .lead.overdue::before{background:linear-gradient(180deg,#f4b8b8,#ee9a9a)}
+  .lead.dead{opacity:.55}
+  .lead.dead::before{background:linear-gradient(180deg,#c9c6d4,#b3afc2)}
   .lead .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .lead .biz{font-weight:800;font-size:16px;letter-spacing:-.02em}
   .lead .town{font-size:12px;color:var(--ink-soft);margin-top:2px;font-weight:600}
-  .lead .when{font-size:11px;font-weight:800;padding:6px 11px;border-radius:13px;
-    white-space:nowrap;background:rgba(200,191,240,.35);color:#5b4fb0}
+  .lead .when{font-size:11px;font-weight:800;padding:6px 11px;border-radius:13px;white-space:nowrap;
+    background:rgba(200,191,240,.35);color:#5b4fb0}
   .lead .when.due{background:rgba(240,200,140,.35);color:#a5710f}
   .lead .when.overdue{background:rgba(240,160,160,.35);color:#b13c3c}
+  .lead .when.dead{background:rgba(160,155,180,.25);color:#5f5a70}
   .lead .meta{font-size:13px;margin-top:10px;font-weight:600}
   .lead .meta b{font-weight:800}
   .lead .said{font-size:12.5px;color:var(--ink-soft);margin-top:6px;font-style:italic;
     font-weight:500;line-height:1.5}
-  .lead .next{font-size:12.5px;margin-top:9px;font-weight:800;color:#5b4fb0;
-    display:flex;align-items:center;gap:6px}
-  .lead .rowbtns{display:flex;gap:8px;margin-top:13px}
-  .lead .rowbtns a,.lead .rowbtns button{
-    flex:1;text-align:center;text-decoration:none;border:1px solid rgba(120,110,160,.18);
-    background:rgba(255,255,255,.55);border-radius:13px;padding:10px;font-size:12.5px;
-    font-weight:800;color:var(--ink);cursor:pointer;display:flex;
-    align-items:center;justify-content:center;gap:5px}
-  .lead .rowbtns .done{background:linear-gradient(140deg,#c8efdd,#a5e3c8);
-    border-color:transparent;color:#1d6647}
+  .lead .next{font-size:12.5px;margin-top:9px;font-weight:800;color:#5b4fb0}
+  .lead .stagebar{font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-top:8px;
+    letter-spacing:.03em}
+
+  /* contact buttons */
+  .contactrow{display:flex;gap:7px;margin-top:12px}
+  .cbtn{flex:1;text-align:center;text-decoration:none;border:none;border-radius:13px;
+    padding:11px 6px;font-size:12px;font-weight:800;cursor:pointer;display:flex;
+    align-items:center;justify-content:center;gap:5px;color:#231f36}
+  .cbtn.text{background:linear-gradient(140deg,#c8efdd,#a5e3c8)}
+  .cbtn.email{background:linear-gradient(140deg,#d3c9f6,#b9a9f0)}
+  .cbtn.insta{background:linear-gradient(140deg,#f7d9c9,#f3c0a8)}
+  .cbtn.off{background:rgba(255,255,255,.5);color:#a09bb0;
+    border:1px solid rgba(120,110,160,.15)}
+
+  .resprow{display:flex;gap:7px;margin-top:8px}
+  .rbtn{flex:1;border:1px solid rgba(120,110,160,.18);background:rgba(255,255,255,.6);
+    border-radius:13px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .rbtn.replied{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;border-color:transparent}
+  .rbtn.dead{color:#b13c3c}
 
   .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:34px 14px;
     line-height:1.7;font-weight:500}
-
-  .toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
     background:var(--charcoal);color:#fff;padding:13px 22px;border-radius:30px;font-size:13.5px;
     font-weight:700;opacity:0;transition:all .28s ease;z-index:60;pointer-events:none;
     box-shadow:0 10px 30px rgba(30,25,50,.4)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  .banner{border-radius:var(--r-md);padding:14px 16px;font-size:13px;font-weight:700;
-    display:none;align-items:center;gap:10px;margin-bottom:12px;
-    background:linear-gradient(140deg,#f7e3c4,#f3d3a8);color:#8a5e12;
-    box-shadow:var(--shadow-soft)}
+  .banner{border-radius:var(--r-md);padding:14px 16px;font-size:13px;font-weight:700;display:none;
+    align-items:center;gap:10px;margin-bottom:12px;
+    background:linear-gradient(140deg,#f7e3c4,#f3d3a8);color:#8a5e12;box-shadow:var(--shadow-soft)}
   .banner.show{display:flex}
-  .banner .bic{width:26px;height:26px;flex:none;border-radius:9px;
-    background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center}
+  .banner .bic{width:26px;height:26px;flex:none;border-radius:9px;background:rgba(255,255,255,.5);
+    display:flex;align-items:center;justify-content:center}
+
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;
+    background:rgba(35,30,60,.45);backdrop-filter:blur(6px)}
+  .modal.on{display:flex}
+  .sheet{width:100%;background:#f4f2fa;border-radius:28px 28px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom,0px) + 22px);
+    max-height:88vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(40,32,70,.3)}
+  .sheet h3{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.02em}
+  .sheet .sub{font-size:12.5px;color:var(--ink-soft);font-weight:500;margin-bottom:16px}
+  .sheet .close{position:absolute;right:22px;margin-top:-4px;background:none;border:none;
+    font-size:22px;color:var(--ink-soft);cursor:pointer}
+  .tpl{margin-bottom:14px}
+  .tpl label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--ink-soft);font-weight:700;margin-bottom:6px}
+  .tpl textarea{width:100%;border:1px solid rgba(120,110,160,.16);border-radius:var(--r-sm);
+    padding:12px 14px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:500;resize:vertical;min-height:80px}
+  .tokens{font-size:11px;color:var(--ink-soft);margin-top:5px;font-weight:600}
+  .btnfull{width:100%;border:none;border-radius:var(--r-md);padding:15px;font-size:15px;
+    font-weight:800;cursor:pointer;background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
+    margin-top:6px}
+  .btnghost{width:100%;border:1px solid rgba(120,110,160,.2);border-radius:var(--r-md);padding:14px;
+    font-size:14px;font-weight:800;cursor:pointer;background:rgba(255,255,255,.7);
+    color:var(--ink);margin-top:9px}
+  .syncnote{font-size:11.5px;color:var(--ink-soft);line-height:1.6;font-weight:500;
+    background:rgba(255,255,255,.6);border-radius:14px;padding:12px 14px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -232,60 +223,46 @@
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <div>
-      <h1>TapMate <span>Log</span></h1>
-      <div class="sub">Tap. Talk. Follow up.</div>
-    </div>
+    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up.</div></div>
   </div>
-  <div class="pill" id="count">0 leads</div>
+  <div class="pill" id="count">0</div>
 </div>
 
-<div class="banner" id="reminderBanner">
-  <div class="bic">⏰</div><span id="reminderText"></span>
+<div class="tabs">
+  <div class="tab on" data-view="today">Today <span class="badge" id="bToday">0</span></div>
+  <div class="tab" data-view="capture">Log new</div>
+  <div class="tab" data-view="all">All <span class="badge" id="bAll">0</span></div>
 </div>
 
-<div class="bento">
-
-  <!-- stats row -->
-  <div class="cell half card clay stat">
-    <div class="statrow">
+<!-- TODAY -->
+<div class="view on" id="v-today">
+  <div class="banner" id="reminderBanner"><div class="bic">⏰</div><span id="reminderText"></span></div>
+  <div class="bento" style="margin-bottom:4px">
+    <div class="cell half card clay stat">
       <div class="ic lav"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6" stroke="#3a2f66" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="big" id="statDue">0</div><div class="k">To contact today</div>
     </div>
-    <div class="big" id="statOpen">0</div>
-    <div class="k">Open follow-ups</div>
-  </div>
-
-  <div class="cell half card dark stat">
-    <div class="statrow">
-      <div class="ic" style="background:rgba(255,255,255,.14)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 2" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="2"/></svg></div>
+    <div class="cell half card dark stat">
+      <div class="ic" style="background:rgba(255,255,255,.14)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="2"/><path d="M12 8v4l3 2" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="big" id="statOpen">0</div><div class="k">Open leads</div>
     </div>
-    <div class="big" id="statDue">0</div>
-    <div class="k">Due today</div>
   </div>
+  <div class="sec"><h3>Contact these</h3>
+    <button class="exp" id="tplBtn">Messages</button></div>
+  <div id="todayList"></div>
+</div>
 
-  <!-- capture -->
-  <div class="cell card">
+<!-- CAPTURE -->
+<div class="view" id="v-capture">
+  <div class="card">
     <div class="eyebrow">Quick capture</div>
     <h2 class="title" style="margin-top:6px">Just left a shop? Talk it in.</h2>
-    <p class="hint">Tap, then speak naturally — "Spoke to Sarah, owner at Blades Barbers in Feltham, keen but busy, message on Instagram tomorrow." Tap again to stop and it fills the form.</p>
-
-    <button class="micbtn" id="micbtn">
-      <span class="dot"></span>
-      <span id="micLabel">Tap to talk</span>
-    </button>
-
-    <div class="transcript" id="transcript">
-      <div class="lbl">What I heard</div>
-      <div id="transcriptText"></div>
-    </div>
-
+    <p class="hint">Tap, then speak naturally — "Spoke to Sarah, owner at Blades Barbers in Feltham, keen but busy, message on Instagram tomorrow."</p>
+    <button class="micbtn" id="micbtn"><span class="dot"></span><span id="micLabel">Tap to talk</span></button>
+    <div class="transcript" id="transcript"><div class="lbl">What I heard</div><div id="transcriptText"></div></div>
     <button class="manual-toggle" id="manualToggle">or type it manually →</button>
-
     <div class="fields" id="fields">
-      <div class="field">
-        <label>Business name</label>
-        <input id="f_biz" placeholder="Blades Barbers">
-      </div>
+      <div class="field"><label>Business name</label><input id="f_biz" placeholder="Blades Barbers"></div>
       <div class="field two">
         <div><label>Town</label><input id="f_town" placeholder="Feltham"></div>
         <div><label>Contact number</label><input id="f_phone" inputmode="tel" placeholder="07…"></div>
@@ -294,37 +271,32 @@
         <div><label>Spoke to</label><input id="f_spoke" placeholder="Sarah"></div>
         <div><label>Owner / DM</label><input id="f_owner" placeholder="Sarah (owner)"></div>
       </div>
-      <div class="field">
-        <label>What they said / objection</label>
-        <textarea id="f_said" placeholder="Interested, wants to think about it"></textarea>
+      <div class="field two">
+        <div><label>Email</label><input id="f_email" inputmode="email" placeholder="optional"></div>
+        <div><label>Instagram handle</label><input id="f_insta" placeholder="@bladesbarbers"></div>
       </div>
-      <div class="field">
-        <label>Next action</label>
-        <input id="f_next" placeholder="Message on Instagram">
-      </div>
-      <div class="field">
-        <label>Channel</label>
+      <div class="field"><label>What they said / objection</label><textarea id="f_said" placeholder="Interested, wants to think about it"></textarea></div>
+      <div class="field"><label>Next action</label><input id="f_next" placeholder="Message on Instagram"></div>
+      <div class="field"><label>Channel</label>
         <div class="chips" id="chanChips">
-          <div class="chip" data-ch="Call">Call</div>
           <div class="chip" data-ch="Text">Text</div>
-          <div class="chip" data-ch="WhatsApp">WhatsApp</div>
-          <div class="chip" data-ch="Instagram">Instagram</div>
           <div class="chip" data-ch="Email">Email</div>
+          <div class="chip" data-ch="Instagram">Instagram</div>
+          <div class="chip" data-ch="Call">Call</div>
           <div class="chip" data-ch="Visit">Visit</div>
         </div>
       </div>
-      <div class="field">
-        <label>When to follow up</label>
+      <div class="field"><label>First contact — when? (you choose)</label>
         <div class="chips" id="whenChips">
           <div class="chip today" data-days="0">Today</div>
           <div class="chip" data-days="1">Tomorrow</div>
           <div class="chip" data-days="2">2 days</div>
           <div class="chip" data-days="3">3 days</div>
           <div class="chip" data-days="7">Next week</div>
+          <div class="chip" data-days="14">2 weeks</div>
         </div>
         <input id="f_when" type="date" style="margin-top:9px">
       </div>
-
       <div class="actionrow">
         <button class="clear" id="clearBtn">Clear</button>
         <button class="save" id="saveBtn">Save lead</button>
@@ -333,298 +305,435 @@
   </div>
 </div>
 
-<div class="sec">
-  <h3>Follow-ups</h3>
-  <button class="exp" id="exportBtn">Export CSV</button>
+<!-- ALL -->
+<div class="view" id="v-all">
+  <div class="sec"><h3>All leads</h3>
+    <button class="exp" id="exportBtn">Export CSV</button></div>
+  <div id="allList"></div>
+  <button class="btnghost" id="syncBtn">Back up to Google Sheets</button>
+  <div class="syncnote" id="syncNote">Not connected. Tap “Back up to Google Sheets” to set it up, or use Export CSV any time.</div>
 </div>
-<div id="list"></div>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal" id="tplModal">
+  <div class="sheet">
+    <button class="close" id="tplClose">×</button>
+    <h3>Your messages</h3>
+    <div class="sub">Written once, filled in automatically each time. Tap a contact button on a lead and it opens ready to send.</div>
+    <div class="tpl"><label>Text / SMS</label>
+      <textarea id="t_text"></textarea>
+      <div class="tokens">Use {name} {business} {town}</div></div>
+    <div class="tpl"><label>Email — subject</label><textarea id="t_emailsub" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Email — body</label><textarea id="t_email"></textarea></div>
+    <div class="tpl"><label>Instagram DM</label><textarea id="t_insta"></textarea>
+      <div class="tokens">Instagram can’t be pre-filled by a link — this copies to your clipboard so you just paste.</div></div>
+    <button class="btnfull" id="tplSave">Save messages</button>
+  </div>
+</div>
+
+<!-- SHEETS MODAL -->
+<div class="modal" id="syncModal">
+  <div class="sheet">
+    <button class="close" id="syncClose">×</button>
+    <h3>Google Sheets backup</h3>
+    <div class="sub">Paste the web-app URL from your Google Apps Script here. Every save then also writes a row to your sheet.</div>
+    <div class="tpl"><label>Apps Script URL</label>
+      <textarea id="sheetUrl" style="min-height:60px" placeholder="https://script.google.com/macros/s/..."></textarea></div>
+    <button class="btnfull" id="syncSave">Save & test</button>
+    <button class="btnghost" id="syncAll">Push all leads now</button>
+    <div class="syncnote">Setup steps are in the notes I sent with this app. Your data always stays on the phone too — Sheets is a backup, not a dependency.</div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const store = {
+/* ================= STORE ================= */
+const store={
   key:'tapmate_leads_v1',
-  all(){ try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]} },
-  save(a){ localStorage.setItem(this.key, JSON.stringify(a)) }
+  all(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
+  save(a){localStorage.setItem(this.key,JSON.stringify(a))}
 };
-const $ = id => document.getElementById(id);
-let selectedChan = '', selectedDays = null;
+const cfg={
+  key:'tapmate_cfg_v1',
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||{}}catch(e){return{}}},
+  set(o){localStorage.setItem(this.key,JSON.stringify(o))}
+};
+const $=id=>document.getElementById(id);
+let selectedChan='',selectedDays=null;
 
-function toast(msg){
-  const t=$('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
+const DEFAULT_TPL={
+  text:"Hi {name}, it's Bailey from TapMate — we spoke at {business}. Just sending over the info on the tap plates. Any questions, just reply here. Thanks!",
+  emailsub:"TapMate — the tap plate for {business}",
+  email:"Hi {name},\n\nGreat to meet you at {business} the other day. As promised, here's a bit more on our tap plates — one tap on a customer's phone takes them straight to your links: socials, reviews, booking, contact, whatever you want on there.\n\nHappy to answer anything or drop one in to show you.\n\nThanks,\nBailey — TapMate",
+  insta:"Hi {name}! Bailey here from TapMate — we spoke at {business}. Just following up with the info on our tap plates. Let me know if you'd like a closer look!"
+};
+function tpl(){ const c=cfg.get(); return Object.assign({},DEFAULT_TPL,c.tpl||{}); }
+
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900)}
+
+/* ================= CHASE LADDER ================= */
+const LADDER=[3,7,14]; // business days
+function addBusinessDays(date,n){
+  const d=new Date(date.getTime());let a=0;
+  while(a<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w!==0&&w!==6)a++}
+  return d;
+}
+function isoOf(d){return d.toISOString().slice(0,10)}
+/* stage 0 = awaiting first contact (user-chosen date)
+   after "no response": stage1 = +3bd, stage2 = +7bd, stage3 = +14bd, then dead */
+function advanceNoResponse(lead){
+  const st=lead.stage||0;
+  lead.lastContact=new Date().toISOString();
+  if(st>=LADDER.length){lead.dead=true;lead.when='';return 'dead';}
+  const nx=addBusinessDays(new Date(),LADDER[st]);
+  lead.stage=st+1;lead.when=isoOf(nx);
+  if(lead.stage>=LADDER.length){
+    // this is the final chase — after this one it dies
+    lead.finalChase=true;
+  }
+  return nx;
+}
+function stageLabel(l){
+  if(l.dead)return 'No longer chasing';
+  const st=l.stage||0;
+  if(st===0)return 'First contact — you picked this date';
+  if(st>=LADDER.length)return 'Final chase (' + st + ' of 3) — next “no response” ends it';
+  return 'Chase '+st+' of 3';
 }
 
-/* ---------- Speech recognition ---------- */
-let recog=null, recording=false, finalText='';
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(SR){
-  recog = new SR();
-  recog.continuous = true;
-  recog.interimResults = true;
-  recog.lang = 'en-GB';
-  recog.onresult = e=>{
-    let interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const r=e.results[i];
-      if(r.isFinal) finalText += r[0].transcript+' ';
-      else interim += r[0].transcript;
-    }
+/* ================= SPEECH ================= */
+let recog=null,recording=false,finalText='';
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang='en-GB';
+  recog.onresult=e=>{let i2='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+      if(r.isFinal)finalText+=r[0].transcript+' ';else i2+=r[0].transcript}
     $('transcript').classList.add('show');
-    $('transcriptText').textContent = (finalText+interim).trim();
-  };
-  recog.onend = ()=>{ if(recording){ try{recog.start()}catch(e){} } };
+    $('transcriptText').textContent=(finalText+i2).trim()};
+  recog.onend=()=>{if(recording){try{recog.start()}catch(e){}}};
 }
-$('micbtn').addEventListener('click', ()=>{
-  if(!SR){ toast('Voice not supported here — type it'); $('fields').classList.add('show'); return; }
-  if(!recording){
-    finalText=''; $('transcriptText').textContent='';
-    try{ recog.start(); }catch(e){}
-    recording=true;
-    $('micbtn').classList.add('recording');
-    $('micLabel').textContent='Listening… tap to stop';
-  } else {
-    recording=false;
-    try{ recog.stop(); }catch(e){}
-    $('micbtn').classList.remove('recording');
-    $('micLabel').textContent='Tap to talk';
-    setTimeout(()=>{ parseTranscript((finalText).trim()); }, 350);
-  }
+$('micbtn').addEventListener('click',()=>{
+  if(!SR){toast('Voice not supported — type it');$('fields').classList.add('show');return}
+  if(!recording){finalText='';$('transcriptText').textContent='';
+    try{recog.start()}catch(e){}
+    recording=true;$('micbtn').classList.add('recording');$('micLabel').textContent='Listening… tap to stop';
+  }else{recording=false;try{recog.stop()}catch(e){}
+    $('micbtn').classList.remove('recording');$('micLabel').textContent='Tap to talk';
+    setTimeout(()=>parseTranscript(finalText.trim()),350)}
 });
 
-/* ---------- On-device parser ---------- */
-const BIZ_TYPES = 'barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
-
+/* ================= PARSER ================= */
+const BIZ_TYPES='barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
 function parseTranscript(text){
-  if(!text){ toast('Nothing captured'); return; }
+  if(!text){toast('Nothing captured');return}
   $('fields').classList.add('show');
-  const raw = text.replace(/\s+/g,' ').trim();
-  const t = ' '+raw+' ';
-  const lower = t.toLowerCase();
-
-  /* Business name */
+  const t=' '+text.replace(/\s+/g,' ').trim()+' ';const lower=t.toLowerCase();
   let biz='';
-  let bizMatch = t.match(/\b(?:spoke to|talked to|talked with|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|went (?:in ?)?to|at|with|for|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
-  if(bizMatch){ biz = bizMatch[1].trim(); }
-  if(!biz || biz.split(' ').length>5){
-    const typed = t.match(new RegExp('((?:[A-Z][A-Za-z0-9\'&]*\\s+){0,4}(?:'+BIZ_TYPES+'))','i'));
-    if(typed) biz = typed[1].trim();
+  const bm=t.match(/\b(?:spoke to|talked to|talked with|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|went (?:in ?)?to|at|with|for|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
+  if(bm)biz=bm[1].trim();
+  if(!biz||biz.split(' ').length>5){
+    const ty=t.match(new RegExp('((?:[A-Z][A-Za-z0-9\'&]*\\s+){0,4}(?:'+BIZ_TYPES+'))','i'));
+    if(ty)biz=ty[1].trim();
   }
-  biz = biz.replace(/^(?:a|an|the|to|some|get)\s+/i,'').trim();
-  if(biz) $('f_biz').value = titleCase(biz);
+  biz=biz.replace(/^(?:a|an|the|to|some|get)\s+/i,'').trim();
+  if(biz)$('f_biz').value=titleCase(biz);
 
-  /* Person */
-  let person = grab(t, /\b(?:spoke to|talked to|talked with|spoke with|saw|met)\s+([A-Z][a-z]+)/i);
-  if(person){ $('f_spoke').value = person; }
+  const person=grab(t,/\b(?:spoke to|talked to|talked with|spoke with|saw|met)\s+([A-Z][a-z]+)/i);
+  if(person)$('f_spoke').value=person;
+  const own=grab(t,/\b([A-Z][a-z]+)\s+(?:the\s+)?owner\b/i)||grab(t,/\bowner\s+(?:is|was|named|called)?\s*([A-Z][a-z]+)/i);
+  if(/\bowner\b/i.test(lower))$('f_owner').value=(own||person||'')+' (owner)';
+  else if(person)$('f_owner').value=person;
 
-  /* Owner */
-  const ownerName = grab(t, /\b([A-Z][a-z]+)\s+(?:the\s+)?owner\b/i) ||
-                    grab(t, /\bowner\s+(?:is|was|named|called)?\s*([A-Z][a-z]+)/i);
-  if(/\bowner\b/i.test(lower)){ $('f_owner').value = (ownerName||person||'') + ' (owner)'; }
-  else if(person){ $('f_owner').value = person; }
+  const tm=t.match(/\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
+  if(tm&&!new RegExp('^(?:'+BIZ_TYPES+')$','i').test(tm[1]))$('f_town').value=tm[1];
 
-  /* Town */
-  let town='';
-  const townM = t.match(/\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
-  if(townM){ const cand=townM[1]; if(!new RegExp('^(?:'+BIZ_TYPES+')$','i').test(cand)) town=cand; }
-  if(town) $('f_town').value = town;
+  const ph=grab(t,/(0\s?7[\d\s]{9,13})/);
+  if(ph)$('f_phone').value=ph.replace(/\s+/g,'');
+  else if(/(?:her|his|their|the)\s+number|gave me (?:a|the|her|his)?\s*number/i.test(lower))
+    $('f_phone').placeholder='They gave a number — type it';
 
-  /* Phone */
-  const phone = grab(t, /(0\s?7[\d\s]{9,13})/);
-  if(phone){ $('f_phone').value = phone.replace(/\s+/g,''); }
-  else if(/(?:her|his|their|the)\s+number|gave me (?:a|the|her|his)?\s*number/i.test(lower)){
-    $('f_phone').value=''; $('f_phone').placeholder='They gave a number — type it';
-  }
+  const sig=[];
+  [[/too expensive|bit expensive|pricey/,'Thinks it\u2019s too expensive'],
+   [/think about it|have a think|need to think/,'Wants to think about it'],
+   [/not sure/,'Not sure yet'],[/already (?:have|got)/,'Says they already have one'],
+   [/not interested|no thanks/,'Not interested'],
+   [/call back|come back|pop back|another time|catch (?:me|us) later/,'Come back another time'],
+   [/busy/,'Was busy'],[/loyalty cards?/,'Interested in loyalty cards'],
+   [/review plate|google review/,'Interested in review plate'],
+   [/booking|booksy|fresha/,'Interested re: booking links'],
+   [/owner (?:is )?(?:not|isn'?t) (?:back|in|around)|not back until/,'Owner away — wait']
+  ].forEach(([re,l])=>{if(re.test(lower))sig.push(l)});
+  if(/interested|keen|likes? it|loves? it|want (?:one|it|some)|sold/.test(lower)&&!/not interested/.test(lower))sig.unshift('Interested');
+  $('f_said').value=[...new Set(sig)].join('; ');
 
-  /* Sentiment */
-  const signals=[];
-  const objRe=[
-    [/too expensive|bit expensive|pricey/, 'Thinks it\u2019s too expensive'],
-    [/think about it|have a think|need to think/, 'Wants to think about it'],
-    [/not sure/, 'Not sure yet'],
-    [/already (?:have|got)/, 'Says they already have one'],
-    [/not interested|no thanks/, 'Not interested'],
-    [/call back|come back|pop back|another time|catch (?:me|us) later/, 'Come back another time'],
-    [/busy/, 'Was busy'],
-    [/loyalty cards?/, 'Interested in loyalty cards'],
-    [/review plate|google review/, 'Interested in review plate'],
-    [/booking|booksy|fresha/, 'Interested re: booking links']
-  ];
-  objRe.forEach(([re,label])=>{ if(re.test(lower)) signals.push(label); });
-  if(/interested|keen|likes? it|loves? it|want (?:one|it|some)|sold/.test(lower) && !/not interested/.test(lower)){
-    signals.unshift('Interested');
-  }
-  $('f_said').value = [...new Set(signals)].join('; ');
+  let chan='',act='';
+  if(/text|sms/.test(lower)&&!/instagram|insta/.test(lower)){chan='Text';act='Text over the info'}
+  if(/instagram|insta|dm them/.test(lower)){chan='Instagram';act='Message on Instagram'}
+  else if(/\bemail\b/.test(lower)){chan='Email';act='Email over the info'}
+  else if(/\bcall\b|ring/.test(lower)){chan='Call';act='Call them'}
+  else if(/pop back|go back|visit|come back/.test(lower)){chan='Visit';act='Pop back in'}
+  if(!chan&&/send (?:over|them)?\s*(?:some )?(?:info|information|details)/.test(lower))act='Send over some information';
+  if(chan)selChan(chan);
+  if(act)$('f_next').value=act;
 
-  /* Channel + action */
-  let chan='', action='';
-  if(/text|sms|send (?:a|some|over)?\s*(?:message|info|information|details)?\s*(?:via|by)?\s*text|message (?:them )?(?:some|the)?\s*(?:info|information|details)/.test(lower) && !/instagram|whatsapp|insta/.test(lower)){
-    chan='Text'; action='Text over the info';
-  }
-  if(/instagram|insta|dm them|follow them|follow him|follow her/.test(lower)){ chan='Instagram'; action='Message on Instagram'; }
-  else if(/whatsapp/.test(lower)){ chan='WhatsApp'; action='WhatsApp them'; }
-  else if(/\bemail\b/.test(lower)){ chan='Email'; action='Email over the info'; }
-  else if(/\bcall\b|ring|phone (?:them|her|him)/.test(lower)){ chan='Call'; action='Call them'; }
-  else if(/pop back|go back|visit|come back/.test(lower)){ chan='Visit'; action='Pop back in'; }
-  if(!chan && /send (?:over|them)?\s*(?:some )?(?:info|information|details)/.test(lower)){ action='Send over some information'; }
-  if(chan){ selChan(chan); }
-  if(action){ $('f_next').value = action; }
+  let d=null;
+  if(/today/.test(lower))d=0;else if(/tomorrow/.test(lower))d=1;
+  else if(/monday/.test(lower))d=nextDow(1);else if(/tuesday/.test(lower))d=nextDow(2);
+  else if(/wednesday/.test(lower))d=nextDow(3);else if(/thursday/.test(lower))d=nextDow(4);
+  else if(/friday/.test(lower))d=nextDow(5);else if(/saturday/.test(lower))d=nextDow(6);
+  else if(/next week/.test(lower))d=7;else if(/two weeks|fortnight/.test(lower))d=14;
+  else if(/couple of days|two days|few days/.test(lower))d=2;
+  if(d!=null)setWhenDays(d);
 
-  /* When */
-  let days=null;
-  if(/today/.test(lower)) days=0;
-  else if(/tomorrow/.test(lower)) days=1;
-  else if(/monday/.test(lower)) days=nextDow(1);
-  else if(/tuesday/.test(lower)) days=nextDow(2);
-  else if(/wednesday/.test(lower)) days=nextDow(3);
-  else if(/thursday/.test(lower)) days=nextDow(4);
-  else if(/friday/.test(lower)) days=nextDow(5);
-  else if(/saturday/.test(lower)) days=nextDow(6);
-  else if(/next week/.test(lower)) days=7;
-  else if(/couple of days|two days|few days/.test(lower)) days=2;
-  if(days!=null){ setWhenDays(days); }
-
-  const missing=[];
-  if(!$('f_biz').value) missing.push('business');
-  if(!$('f_town').value) missing.push('town');
-  toast(missing.length? 'Filled in \u2014 check '+missing.join(' & ') : 'Filled in \u2014 check & save');
+  const miss=[];if(!$('f_biz').value)miss.push('business');if(!$('f_town').value)miss.push('town');
+  toast(miss.length?'Filled in — check '+miss.join(' & '):'Filled in — check & save');
 }
-function grab(t, re){ const m=t.match(re); return m? m[1].trim():''; }
-function titleCase(s){ return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1)); }
+function grab(t,re){const m=t.match(re);return m?m[1].trim():''}
+function titleCase(s){return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1))}
+function nextDow(t){const n=new Date().getDay();let d=(t-n+7)%7;if(d===0)d=7;return d}
 
-/* ---------- Chips ---------- */
-document.querySelectorAll('#chanChips .chip').forEach(c=>{
-  c.addEventListener('click',()=>selChan(c.dataset.ch));
-});
-function selChan(ch){
-  selectedChan=ch;
-  document.querySelectorAll('#chanChips .chip').forEach(c=>c.classList.toggle('on', c.dataset.ch===ch));
-}
-document.querySelectorAll('#whenChips .chip').forEach(c=>{
-  c.addEventListener('click',()=>setWhenDays(parseInt(c.dataset.days)));
-});
-function setWhenDays(days){
-  selectedDays=days;
-  const d=new Date(); d.setDate(d.getDate()+days);
-  $('f_when').value = d.toISOString().slice(0,10);
-  document.querySelectorAll('#whenChips .chip').forEach(c=>c.classList.toggle('on', parseInt(c.dataset.days)===days));
-}
-function nextDow(target){
-  const now=new Date(); const cur=now.getDay();
-  let diff=(target-cur+7)%7; if(diff===0) diff=7; return diff;
-}
+/* ================= CHIPS ================= */
+document.querySelectorAll('#chanChips .chip').forEach(c=>c.addEventListener('click',()=>selChan(c.dataset.ch)));
+function selChan(ch){selectedChan=ch;
+  document.querySelectorAll('#chanChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.ch===ch))}
+document.querySelectorAll('#whenChips .chip').forEach(c=>c.addEventListener('click',()=>setWhenDays(parseInt(c.dataset.days))));
+function setWhenDays(days){selectedDays=days;
+  const d=new Date();d.setDate(d.getDate()+days);$('f_when').value=isoOf(d);
+  document.querySelectorAll('#whenChips .chip').forEach(c=>c.classList.toggle('on',parseInt(c.dataset.days)===days))}
 
-/* ---------- Manual toggle ---------- */
-$('manualToggle').addEventListener('click',()=>{ $('fields').classList.toggle('show'); });
+$('manualToggle').addEventListener('click',()=>$('fields').classList.toggle('show'));
 
-/* ---------- Save ---------- */
+/* ================= SAVE ================= */
 $('saveBtn').addEventListener('click',()=>{
   const biz=$('f_biz').value.trim();
-  if(!biz){ toast('Add a business name'); $('f_biz').focus(); return; }
-  const lead={
-    id:Date.now(), biz, town:$('f_town').value.trim(),
-    spoke:$('f_spoke').value.trim(), owner:$('f_owner').value.trim(),
-    phone:$('f_phone').value.trim(), said:$('f_said').value.trim(),
-    next:$('f_next').value.trim(), channel:selectedChan,
-    when:$('f_when').value, created:new Date().toISOString(), done:false
-  };
-  const a=store.all(); a.unshift(lead); store.save(a);
-  clearForm(); render(); toast('Saved ✓');
+  if(!biz){toast('Add a business name');$('f_biz').focus();return}
+  const lead={id:Date.now(),biz,town:$('f_town').value.trim(),spoke:$('f_spoke').value.trim(),
+    owner:$('f_owner').value.trim(),phone:$('f_phone').value.trim(),
+    email:$('f_email').value.trim(),insta:$('f_insta').value.trim().replace(/^@/,''),
+    said:$('f_said').value.trim(),next:$('f_next').value.trim(),channel:selectedChan,
+    when:$('f_when').value||isoOf(new Date()),created:new Date().toISOString(),
+    stage:0,dead:false,done:false,lastContact:''};
+  const a=store.all();a.unshift(lead);store.save(a);
+  pushToSheet(lead);
+  clearForm();render();toast('Saved ✓');
+  switchView('today');
 });
 $('clearBtn').addEventListener('click',clearForm);
 function clearForm(){
-  ['f_biz','f_town','f_spoke','f_owner','f_phone','f_said','f_next','f_when'].forEach(id=>$(id).value='');
-  selectedChan=''; selectedDays=null;
+  ['f_biz','f_town','f_spoke','f_owner','f_phone','f_email','f_insta','f_said','f_next','f_when']
+    .forEach(id=>{$(id).value='';});
+  $('f_phone').placeholder='07…';
+  selectedChan='';selectedDays=null;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  $('transcript').classList.remove('show'); $('transcriptText').textContent='';
-  $('fields').classList.remove('show');
-  $('micLabel').textContent='Tap to talk';
+  $('transcript').classList.remove('show');$('transcriptText').textContent='';
+  $('fields').classList.remove('show');$('micLabel').textContent='Tap to talk';
 }
 
-/* ---------- Render ---------- */
-function fmtWhen(w){
-  if(!w) return {label:'No date',cls:''};
-  const today=new Date(); today.setHours(0,0,0,0);
-  const d=new Date(w+'T00:00:00');
-  const diff=Math.round((d-today)/86400000);
-  if(diff<0) return {label:'Overdue',cls:'overdue'};
-  if(diff===0) return {label:'Today',cls:'due'};
-  if(diff===1) return {label:'Tomorrow',cls:'due'};
-  if(diff<7) return {label:d.toLocaleDateString('en-GB',{weekday:'short'}),cls:''};
-  return {label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),cls:''};
+/* ================= MESSAGE FILL ================= */
+function fill(str,l){
+  const name=(l.owner||l.spoke||'there').replace(/\s*\(owner\)\s*/i,'').trim()||'there';
+  return str.replace(/{name}/g,name).replace(/{business}/g,l.biz||'your shop')
+            .replace(/{town}/g,l.town||'');
 }
-function chanLink(l){
-  const p=(l.phone||'').replace(/\D/g,'').replace(/^0/,'44');
-  if(l.channel==='WhatsApp'&&p) return 'https://wa.me/'+p;
-  if(l.channel==='Call'&&l.phone) return 'tel:'+l.phone;
-  if(l.channel==='Text'&&l.phone) return 'sms:'+l.phone;
-  if(l.channel==='Email') return 'mailto:';
-  if(l.channel==='Instagram') return 'https://instagram.com';
-  return '';
+function telLink(p){return 'tel:'+p}
+function smsLink(l){
+  const t=tpl();const body=encodeURIComponent(fill(t.text,l));
+  const sep=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'&':'?';
+  return 'sms:'+(l.phone||'')+sep+'body='+body;
 }
-function render(){
-  const a=store.all().filter(x=>!x.done);
-  $('count').textContent=a.length+' lead'+(a.length===1?'':'s');
-  $('statOpen').textContent=a.length;
-  a.sort((x,y)=>(x.when||'9999').localeCompare(y.when||'9999'));
+function mailLink(l){
+  const t=tpl();
+  return 'mailto:'+(l.email||'')+'?subject='+encodeURIComponent(fill(t.emailsub,l))
+    +'&body='+encodeURIComponent(fill(t.email,l));
+}
+function instaOpen(l){
+  const t=tpl();const msg=fill(t.insta,l);
+  navigator.clipboard&&navigator.clipboard.writeText(msg);
+  toast('Message copied — paste in the DM');
+  const h=(l.insta||'').replace(/^@/,'');
+  window.open(h?'https://instagram.com/'+h:'https://instagram.com','_blank');
+}
+window.instaOpen=instaOpen;
 
-  const today=new Date(); today.setHours(0,0,0,0);
-  const dueCount=a.filter(l=>l.when && new Date(l.when+'T00:00:00')<=today).length;
-  $('statDue').textContent=dueCount;
-
-  const list=$('list');
-  if(a.length===0){
-    list.innerHTML='<div class="empty">No open follow-ups yet.<br>Talk in your next lead above ↑</div>';
-  } else {
-    list.innerHTML=a.map(l=>{
-      const w=fmtWhen(l.when); const link=chanLink(l);
-      return `<div class="lead ${w.cls}">
-        <div class="top">
-          <div><div class="biz">${esc(l.biz)}</div>
-          <div class="town">${esc(l.town||'')}</div></div>
-          <div class="when ${w.cls}">${w.label}</div>
-        </div>
-        ${l.owner||l.spoke?`<div class="meta"><b>${esc(l.owner||l.spoke)}</b>${l.phone?' · '+esc(l.phone):''}</div>`:''}
-        ${l.said?`<div class="said">"${esc(l.said)}"</div>`:''}
-        ${l.next?`<div class="next">→ ${esc(l.next)}${l.channel?' ('+l.channel+')':''}</div>`:''}
-        <div class="rowbtns">
-          ${link?`<a href="${link}" target="_blank">${l.channel||'Open'}</a>`:''}
-          <button class="done" onclick="markDone(${l.id})">Mark done ✓</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  updateReminder(dueCount);
-}
-function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-window.markDone=function(id){
-  const a=store.all(); const l=a.find(x=>x.id===id); if(l)l.done=true;
-  store.save(a); render(); toast('Done ✓');
+/* ================= ACTIONS ================= */
+window.markReplied=function(id){
+  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
+  l.done=true;l.repliedAt=new Date().toISOString();
+  store.save(a);pushToSheet(l);render();toast('Nice — marked as replied ✓');
+};
+window.noResponse=function(id){
+  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
+  const r=advanceNoResponse(l);
+  store.save(a);pushToSheet(l);render();
+  toast(r==='dead'?'Moved to no longer chasing':'Chase set for '+
+    new Date(l.when+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
+};
+window.killLead=function(id){
+  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
+  l.dead=true;l.when='';store.save(a);pushToSheet(l);render();toast('Stopped chasing');
+};
+window.snooze=function(id,days){
+  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
+  l.when=isoOf(addBusinessDays(new Date(),days));store.save(a);pushToSheet(l);render();
+  toast('Pushed to '+new Date(l.when+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
 };
 
-/* ---------- Reminder banner ---------- */
-function updateReminder(dueCount){
+/* ================= RENDER ================= */
+function fmtWhen(w,dead){
+  if(dead)return{label:'Dead',cls:'dead'};
+  if(!w)return{label:'No date',cls:''};
+  const t=new Date();t.setHours(0,0,0,0);
+  const d=new Date(w+'T00:00:00');const diff=Math.round((d-t)/86400000);
+  if(diff<0)return{label:'Overdue',cls:'overdue'};
+  if(diff===0)return{label:'Today',cls:'due'};
+  if(diff===1)return{label:'Tomorrow',cls:'due'};
+  if(diff<7)return{label:d.toLocaleDateString('en-GB',{weekday:'short'}),cls:''};
+  return{label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),cls:''};
+}
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function leadCard(l,showActions){
+  const w=fmtWhen(l.when,l.dead);
+  const name=esc(l.owner||l.spoke||'');
+  const hasP=!!l.phone,hasE=!!l.email;
+  return `<div class="lead ${w.cls}${l.dead?' dead':''}">
+    <div class="top">
+      <div><div class="biz">${esc(l.biz)}</div><div class="town">${esc(l.town||'')}</div></div>
+      <div class="when ${w.cls}">${w.label}</div>
+    </div>
+    ${name?`<div class="meta"><b>${name}</b>${l.phone?' · '+esc(l.phone):''}</div>`:''}
+    ${l.said?`<div class="said">"${esc(l.said)}"</div>`:''}
+    ${l.next?`<div class="next">→ ${esc(l.next)}</div>`:''}
+    <div class="stagebar">${stageLabel(l)}</div>
+    ${showActions&&!l.dead?`
+    <div class="contactrow">
+      ${hasP?`<a class="cbtn text" href="${smsLink(l)}">Text</a>`:`<span class="cbtn off">No number</span>`}
+      ${hasE?`<a class="cbtn email" href="${mailLink(l)}">Email</a>`:`<span class="cbtn off">No email</span>`}
+      <button class="cbtn insta" onclick="instaOpen(${l.id})">Instagram</button>
+    </div>
+    <div class="resprow">
+      <button class="rbtn replied" onclick="markReplied(${l.id})">Replied ✓</button>
+      <button class="rbtn" onclick="noResponse(${l.id})">No response</button>
+      <button class="rbtn dead" onclick="killLead(${l.id})">Stop</button>
+    </div>`:''}
+  </div>`;
+}
+/* instaOpen needs the lead object */
+window.instaOpen=function(id){
+  const l=store.all().find(x=>x.id===id);if(!l)return;
+  const t=tpl();const msg=fill(t.insta,l);
+  if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});
+  toast('Message copied — paste in the DM');
+  const h=(l.insta||'').replace(/^@/,'');
+  window.open(h?'https://instagram.com/'+h:'https://instagram.com','_blank');
+};
+
+function render(){
+  const all=store.all();
+  const open=all.filter(x=>!x.done&&!x.dead);
+  const today=new Date();today.setHours(0,0,0,0);
+  const due=open.filter(l=>l.when&&new Date(l.when+'T00:00:00')<=today);
+  due.sort((a,b)=>(a.when||'').localeCompare(b.when||''));
+
+  $('count').textContent=open.length;
+  $('bToday').textContent=due.length;
+  $('bAll').textContent=all.filter(x=>!x.done).length;
+  $('statDue').textContent=due.length;
+  $('statOpen').textContent=open.length;
+
+  $('todayList').innerHTML=due.length?due.map(l=>leadCard(l,true)).join(''):
+    '<div class="empty">Nothing due today.<br>Enjoy it — or log a new lead ↑</div>';
+
+  const sorted=all.filter(x=>!x.done).sort((a,b)=>{
+    if(a.dead!==b.dead)return a.dead?1:-1;
+    return (a.when||'9999').localeCompare(b.when||'9999')});
+  $('allList').innerHTML=sorted.length?sorted.map(l=>leadCard(l,true)).join(''):
+    '<div class="empty">No leads yet.</div>';
+
   const b=$('reminderBanner');
-  if(dueCount){ b.classList.add('show'); $('reminderText').textContent=dueCount+' follow-up'+(dueCount>1?'s':'')+' due today or overdue'; }
+  if(due.length){b.classList.add('show');
+    $('reminderText').textContent=due.length+' to contact today';}
   else b.classList.remove('show');
 }
 
-/* ---------- Export CSV ---------- */
+/* ================= VIEWS ================= */
+function switchView(v){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  $('v-'+v).classList.add('on');
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
+
+/* ================= TEMPLATES ================= */
+$('tplBtn').addEventListener('click',()=>{
+  const t=tpl();
+  $('t_text').value=t.text;$('t_emailsub').value=t.emailsub;
+  $('t_email').value=t.email;$('t_insta').value=t.insta;
+  $('tplModal').classList.add('on');
+});
+$('tplClose').addEventListener('click',()=>$('tplModal').classList.remove('on'));
+$('tplSave').addEventListener('click',()=>{
+  const c=cfg.get();
+  c.tpl={text:$('t_text').value,emailsub:$('t_emailsub').value,
+    email:$('t_email').value,insta:$('t_insta').value};
+  cfg.set(c);$('tplModal').classList.remove('on');render();toast('Messages saved ✓');
+});
+
+/* ================= SHEETS SYNC ================= */
+$('syncBtn').addEventListener('click',()=>{
+  $('sheetUrl').value=cfg.get().sheetUrl||'';
+  $('syncModal').classList.add('on');
+});
+$('syncClose').addEventListener('click',()=>$('syncModal').classList.remove('on'));
+$('syncSave').addEventListener('click',()=>{
+  const c=cfg.get();c.sheetUrl=$('sheetUrl').value.trim();cfg.set(c);
+  updateSyncNote();
+  if(c.sheetUrl){pushToSheet({id:'test',biz:'TapMate test row',town:'',owner:'',phone:'',
+    email:'',said:'connection test',next:'',channel:'',when:'',stage:0,dead:false,done:false,
+    created:new Date().toISOString()});toast('Saved — check your sheet for a test row');}
+  else toast('URL cleared');
+  $('syncModal').classList.remove('on');
+});
+$('syncAll').addEventListener('click',()=>{
+  const url=cfg.get().sheetUrl;
+  if(!url){toast('Add your Apps Script URL first');return}
+  const a=store.all();a.forEach(l=>pushToSheet(l));
+  toast('Pushed '+a.length+' leads');
+});
+function pushToSheet(lead){
+  const url=cfg.get().sheetUrl;if(!url)return;
+  try{
+    fetch(url,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(lead)}).catch(()=>{});
+  }catch(e){}
+}
+function updateSyncNote(){
+  const u=cfg.get().sheetUrl;
+  $('syncNote').textContent=u?'Connected. Every save and update also writes to your sheet.':
+    'Not connected. Tap “Back up to Google Sheets” to set it up, or use Export CSV any time.';
+}
+
+/* ================= EXPORT ================= */
 $('exportBtn').addEventListener('click',()=>{
   const a=store.all();
-  if(!a.length){ toast('Nothing to export'); return; }
-  const cols=['Business','Town','Spoke to','Owner/DM','Phone','What they said','Next action','Channel','Follow-up date','Logged','Done'];
-  const rows=a.map(l=>[l.biz,l.town,l.spoke,l.owner,l.phone,l.said,l.next,l.channel,l.when,
-    new Date(l.created).toLocaleString('en-GB'),l.done?'Yes':'No']);
+  if(!a.length){toast('Nothing to export');return}
+  const cols=['Business','Town','Spoke to','Owner/DM','Phone','Email','Instagram','What they said',
+    'Next action','Channel','Follow-up date','Stage','Dead','Replied','Logged'];
+  const rows=a.map(l=>[l.biz,l.town,l.spoke,l.owner,l.phone,l.email,l.insta,l.said,l.next,
+    l.channel,l.when,stageLabel(l),l.dead?'Yes':'No',l.done?'Yes':'No',
+    new Date(l.created).toLocaleString('en-GB')]);
   const csv=[cols,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
-  const url=URL.createObjectURL(blob);
-  const a2=document.createElement('a');
-  a2.href=url; a2.download='tapmate-leads-'+new Date().toISOString().slice(0,10)+'.csv';
-  a2.click(); URL.revokeObjectURL(url);
+  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
+  const a2=document.createElement('a');a2.href=u;
+  a2.download='tapmate-leads-'+isoOf(new Date())+'.csv';a2.click();URL.revokeObjectURL(u);
   toast('CSV exported');
 });
 
+updateSyncNote();
 render();
 </script>
 </body>
