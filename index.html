@@ -84,6 +84,10 @@
     transition:transform .08s ease}
   .micbtn:active{transform:scale(.98)}
   .micbtn.recording{background:linear-gradient(140deg,#f5b7c4,#f0a5a5);color:#4a1f28}
+  .micbtn.secondary{background:rgba(255,255,255,.6);color:#5b4fb0;
+    border:1px solid rgba(120,110,160,.2);box-shadow:none;font-size:14px;padding:14px;margin-bottom:4px}
+  .micbtn.secondary:active{transform:scale(.98)}
+  .micbtn.secondary.recording{background:linear-gradient(140deg,#f5b7c4,#f0a5a5);color:#4a1f28;border-color:transparent}
   .micbtn .dot{width:11px;height:11px;border-radius:50%;background:#231f36}
   .micbtn.recording .dot{background:#4a1f28;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
@@ -165,14 +169,24 @@
   .cbtn.text{background:linear-gradient(140deg,#c8efdd,#a5e3c8)}
   .cbtn.email{background:linear-gradient(140deg,#d3c9f6,#b9a9f0)}
   .cbtn.insta{background:linear-gradient(140deg,#f7d9c9,#f3c0a8)}
-  .cbtn.off{background:rgba(255,255,255,.5);color:#a09bb0;
-    border:1px solid rgba(120,110,160,.15)}
+  .cbtn.off{background:#fff;color:#b3aec2;border:1px solid rgba(120,110,160,.15)}
 
+  /* response buttons — all same white background, text colour differs */
   .resprow{display:flex;gap:7px;margin-top:8px}
-  .rbtn{flex:1;border:1px solid rgba(120,110,160,.18);background:rgba(255,255,255,.6);
-    border-radius:13px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;color:var(--ink)}
-  .rbtn.replied{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;border-color:transparent}
-  .rbtn.dead{color:#b13c3c}
+  .rbtn{flex:1;border:1px solid rgba(120,110,160,.18);background:#fff;
+    border-radius:13px;padding:10px;font-size:12px;font-weight:800;cursor:pointer}
+  .rbtn.r-replied{color:#1d6647}
+  .rbtn.r-replied.active{border-color:#1d6647;box-shadow:inset 0 0 0 1px #1d6647}
+  .rbtn.r-noresp{color:#5b4fb0}
+  .rbtn.r-stop{color:#b13c3c}
+
+  .rbadge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    background:#c8efdd;color:#1d6647;padding:2px 7px;border-radius:8px;margin-left:8px;
+    vertical-align:middle}
+
+  .editbtn{width:100%;margin-top:8px;background:none;border:none;color:var(--ink-soft);
+    font-size:11.5px;font-weight:700;cursor:pointer;padding:6px;text-decoration:underline;
+    text-underline-offset:2px}
 
   .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:34px 14px;
     line-height:1.7;font-weight:500}
@@ -223,7 +237,7 @@
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· a</b></div></div>
+    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· c</b></div></div>
   </div>
   <div class="pill" id="count">0</div>
 </div>
@@ -255,13 +269,12 @@
 <!-- CAPTURE -->
 <div class="view" id="v-capture">
   <div class="card">
-    <div class="eyebrow">Quick capture</div>
-    <h2 class="title" style="margin-top:6px">Just left a shop? Talk it in.</h2>
-    <p class="hint">Tap, then speak naturally — "Spoke to Sarah, owner at Blades Barbers in Feltham, keen but busy, message on Instagram tomorrow."</p>
-    <button class="micbtn" id="micbtn"><span class="dot"></span><span id="micLabel">Tap to talk</span></button>
+    <div class="eyebrow">Log a lead</div>
+    <h2 class="title" style="margin-top:6px">New lead</h2>
+    <p class="hint">Fill in what you've got — you can add the rest later by tapping Edit on the lead. Or use voice to fill it in fast.</p>
+    <button class="micbtn secondary" id="micbtn"><span class="dot"></span><span id="micLabel">🎤 Fill by voice instead</span></button>
     <div class="transcript" id="transcript"><div class="lbl">What I heard</div><div id="transcriptText"></div></div>
-    <button class="manual-toggle" id="manualToggle">or type it manually →</button>
-    <div class="fields" id="fields">
+    <div class="fields show" id="fields">
       <div class="field"><label>Business name</label><input id="f_biz" placeholder="Blades Barbers"></div>
       <div class="field two">
         <div><label>Town</label><input id="f_town" placeholder="Feltham"></div>
@@ -274,6 +287,14 @@
       <div class="field two">
         <div><label>Email</label><input id="f_email" inputmode="email" placeholder="optional"></div>
         <div><label>Instagram handle</label><input id="f_insta" placeholder="@bladesbarbers"></div>
+      </div>
+      <div class="field"><label>Product they're interested in</label>
+        <div class="chips" id="prodChips">
+          <div class="chip" data-prod="Multi-Link">Multi-Link</div>
+          <div class="chip" data-prod="White Google">White Google</div>
+          <div class="chip" data-prod="Black Google">Black Google</div>
+          <div class="chip" data-prod="Blue Google">Blue Google</div>
+        </div>
       </div>
       <div class="field"><label>What they said / objection</label><textarea id="f_said" placeholder="Interested, wants to think about it"></textarea></div>
       <div class="field"><label>Next action</label><input id="f_next" placeholder="Message on Instagram"></div>
@@ -319,9 +340,7 @@
   <div class="sheet">
     <button class="close" id="tplClose">×</button>
     <h3>Your sales sequence</h3>
-    <div class="sub">Your 4 chase messages. Each fills in automatically and is used for whichever chase a lead is on — same message whether you send by Text, Email or Instagram. Tokens: {name} {business} {town} {link}</div>
-    <div class="tpl"><label>Product link (used by {link})</label>
-      <textarea id="t_link" style="min-height:44px" placeholder="https://tapmate.co.uk/multi-link-plate"></textarea></div>
+    <div class="sub">Your 4 chase messages. Each fills in automatically for whichever chase a lead is on — same message by Text, Email or Instagram. The {link} token is set automatically from the product you picked on each lead. Tokens: {name} {business} {town} {link}</div>
     <div class="tpl"><label>Email subject line</label>
       <textarea id="t_emailsub" style="min-height:44px"></textarea></div>
     <div class="tpl"><label>Chase 1 — Day 0 (same evening)</label><textarea id="t_c0" style="min-height:150px"></textarea></div>
@@ -346,6 +365,35 @@
   </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal">
+  <div class="sheet">
+    <button class="close" id="editClose">×</button>
+    <h3>Edit lead</h3>
+    <div class="sub" id="editSub">Update anything — add an Instagram handle, owner name, objection, or change the product.</div>
+    <div class="tpl"><label>Business name</label><textarea id="e_biz" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Town</label><textarea id="e_town" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Contact number</label><textarea id="e_phone" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Spoke to</label><textarea id="e_spoke" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Owner / decision-maker</label><textarea id="e_owner" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Email</label><textarea id="e_email" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Instagram handle</label><textarea id="e_insta" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Product</label>
+      <div class="chips" id="e_prodChips">
+        <div class="chip" data-prod="Multi-Link">Multi-Link</div>
+        <div class="chip" data-prod="White Google">White Google</div>
+        <div class="chip" data-prod="Black Google">Black Google</div>
+        <div class="chip" data-prod="Blue Google">Blue Google</div>
+      </div></div>
+    <div class="tpl"><label>What they said / objection</label><textarea id="e_said" style="min-height:70px"></textarea></div>
+    <div class="tpl"><label>Next action</label><textarea id="e_next" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Pitch date (start of sequence)</label>
+      <input id="e_pitch" type="date" style="width:100%;border:1px solid rgba(120,110,160,.16);border-radius:15px;padding:12px 14px;font-size:15px;background:#fff;font-family:inherit;font-weight:500"></div>
+    <button class="btnfull" id="editSave">Save changes</button>
+    <button class="btnghost" id="editReopen" style="display:none">Reopen (put back in sequence)</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -363,24 +411,34 @@ const cfg={
 const $=id=>document.getElementById(id);
 let selectedChan='',selectedDays=null;
 
+/* ===== PRODUCTS ===== */
+const PRODUCTS={
+  'Multi-Link':'https://www.tapmate.net/product/all-in-one-multi-link-plate---nfc-qr',
+  'White Google':'https://www.tapmate.net/product/white-google-review-nfc-plate',
+  'Black Google':'https://www.tapmate.net/product/black-google-review-nfc-plate',
+  'Blue Google':'https://www.tapmate.net/product/google-review-plate---nfc-qr-code'
+};
+const PRODUCT_NAMES=Object.keys(PRODUCTS);
+
 /* ===== SALES FUNNEL =====
    4 chase stages keyed to calendar-day offsets from the pitch date.
-   stage index (0..3) points straight into this array.
-   stage 0 = Chase 1 (Day 0, batched evening of the pitch)
-   stage 1 = Chase 2 (Day +1), stage 2 = Chase 3 (Day +5),
-   stage 3 = Chase 4 (Day +10) — after this the lead is done.   */
+   The due date is ALWAYS pitchDate + offset, regardless of when you act. */
 const FUNNEL=[
-  {name:'Chase 1', offset:0, useLink:true,
-   msg:"Hi {name}, it's Jamie from TapMate. Great meeting you today!\n\nAs promised, here's the link to the Multi-Link Plate we looked at:\n{link}\n\nIt lets customers instantly give you Google Reviews, follow you on socials, go to your website, contact info, or pretty much anything else you can think of with a single tap or scan.\n\nIf you have any questions at all, let me know!"},
-  {name:'Chase 2', offset:1, useLink:false,
+  {name:'Chase 1', label:'0 Day', offset:0,
+   msg:"Hi {name}, it's Jamie from TapMate. Great meeting you today!\n\nHere's the link to the Multi-Link Plate we looked at:\n{link}\n\nIt lets customers instantly give you Google Reviews, follow you on socials, go to your website, contact info, or pretty much anything else you can think of with a single tap.\n\nIf you have any questions at all, let me know!"},
+  {name:'Chase 2', label:'1 Day', offset:1,
    msg:"Hi - just checking you got the link I sent over yesterday.\n\nI forgot to mention - we also do stands or cards if you think they would work better!\n\nIf you're not interested that's totally fine, it really helps to know what I could be doing better / differently.\n\nHave a great rest of your day!"},
-  {name:'Chase 3', offset:5, useLink:false,
-   msg:"Hi,\n\nWe can do 40% off if we get things sorted by this Saturday. This would make the Multi-Link Plate £24 down from £55.50.\n\nLet me know if that works, and we can get things sorted.\n\nUse SATURDAY40 on the website or we can send a payment link.\n\nThanks!"},
-  {name:'Chase 4', offset:10, useLink:false,
+  {name:'Chase 3', label:'5 Day', offset:5,
+   msg:"Hi,\n\nWe can do 40% off if we get things sorted by this Saturday. This would make the multi-link plate £24 down from £55.50.\n\nLet me know if that works, and we can get things sorted.\n\nUse SATURDAY40 on the website or we can send a payment link.\n\nThanks!"},
+  {name:'Chase 4', label:'10 Day', offset:10,
    msg:"Sorry to bother, I'll not send any other messages after this one.\n\nIf I did something wrong / could have done something better, please let me know as it would really help.\n\nAll the best, and let us know if we can do anything for you in the future!"}
 ];
 function funnel(){ const c=cfg.get(); return (c.funnel&&c.funnel.length===4)?c.funnel:FUNNEL; }
-function productLink(){ return cfg.get().link || "https://tapmate.co.uk"; }
+/* link for a lead = its selected product's link, else the saved default */
+function linkForLead(l){
+  if(l&&l.product&&PRODUCTS[l.product])return PRODUCTS[l.product];
+  return cfg.get().link || PRODUCTS['Multi-Link'];
+}
 function emailSubject(){ return cfg.get().emailsub || "TapMate — the Multi-Link Plate for {business}"; }
 
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');
@@ -395,8 +453,8 @@ function addBusinessDays(date,n){
 function addDays(date,n){const d=new Date(date.getTime());d.setDate(d.getDate()+n);return d;}
 function isoOf(d){return d.toISOString().slice(0,10)}
 
-/* Advance to the next chase. Date = pitch date + next stage's offset,
-   so the sequence timing is anchored to when you actually pitched.   */
+/* Advance to the next chase. Due date is ALWAYS pitchDate + that
+   stage's offset — never "today" — so the schedule stays fixed. */
 function advanceNoResponse(lead){
   const st=lead.stage||0;
   lead.lastContact=new Date().toISOString();
@@ -404,19 +462,22 @@ function advanceNoResponse(lead){
   if(st>=F.length-1){ lead.dead=true; lead.when=''; return 'dead'; }
   const next=st+1;
   const pitch=lead.pitchDate?new Date(lead.pitchDate+'T00:00:00'):new Date(lead.created);
-  let due=addDays(pitch, F[next].offset);
-  // never schedule in the past; if the offset date has passed, use today
-  const today=new Date(); today.setHours(0,0,0,0);
-  if(due<today) due=today;
+  const due=addDays(pitch, F[next].offset);
   lead.stage=next; lead.when=isoOf(due);
   return F[next].name;
 }
 function stageLabel(l){
-  if(l.dead)return 'Sequence finished — no longer chasing';
-  const F=funnel();const st=l.stage||0;
-  const cur=F[st];
-  const suffix = st===F.length-1 ? ' · last one' : '';
-  return cur.name+' of '+F.length+suffix;
+  if(l.dead)return 'Sequence finished';
+  const F=funnel();const st=l.stage||0;const cur=F[st];
+  return cur.name+' - '+cur.label;
+}
+function daysSinceFirst(l){
+  const start=l.pitchDate?new Date(l.pitchDate+'T00:00:00'):new Date(l.created);
+  const t=new Date();t.setHours(0,0,0,0);start.setHours(0,0,0,0);
+  const d=Math.round((t-start)/86400000);
+  if(d<0)return '';
+  if(d===0)return 'first contact today';
+  return d+' day'+(d===1?'':'s')+' since first contact';
 }
 
 /* ================= SPEECH ================= */
@@ -431,12 +492,12 @@ if(SR){recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang
   recog.onend=()=>{if(recording){try{recog.start()}catch(e){}}};
 }
 $('micbtn').addEventListener('click',()=>{
-  if(!SR){toast('Voice not supported — type it');$('fields').classList.add('show');return}
+  if(!SR){toast('Voice not supported here — just type');return}
   if(!recording){finalText='';$('transcriptText').textContent='';
     try{recog.start()}catch(e){}
-    recording=true;$('micbtn').classList.add('recording');$('micLabel').textContent='Listening… tap to stop';
+    recording=true;$('micbtn').classList.add('recording');$('micLabel').textContent='🔴 Listening… tap to stop';
   }else{recording=false;try{recog.stop()}catch(e){}
-    $('micbtn').classList.remove('recording');$('micLabel').textContent='Tap to talk';
+    $('micbtn').classList.remove('recording');$('micLabel').textContent='🎤 Fill by voice instead';
     setTimeout(()=>parseTranscript(finalText.trim()),350)}
 });
 
@@ -444,7 +505,6 @@ $('micbtn').addEventListener('click',()=>{
 const BIZ_TYPES='barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
 function parseTranscript(text){
   if(!text){toast('Nothing captured');return}
-  $('fields').classList.add('show');
   const t=' '+text.replace(/\s+/g,' ').trim()+' ';const lower=t.toLowerCase();
   let biz='';
   const bm=t.match(/\b(?:spoke to|talked to|talked with|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|went (?:in ?)?to|at|with|for|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
@@ -503,6 +563,12 @@ function parseTranscript(text){
   else if(/couple of days|two days|few days/.test(lower))d=2;
   if(d!=null)setWhenDays(d);
 
+  // product
+  if(/multi-?link/.test(lower))selProduct('Multi-Link');
+  else if(/white google/.test(lower))selProduct('White Google');
+  else if(/black google/.test(lower))selProduct('Black Google');
+  else if(/blue google/.test(lower))selProduct('Blue Google');
+
   const miss=[];if(!$('f_biz').value)miss.push('business');if(!$('f_town').value)miss.push('town');
   toast(miss.length?'Filled in — check '+miss.join(' & '):'Filled in — check & save');
 }
@@ -511,15 +577,17 @@ function titleCase(s){return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.s
 function nextDow(t){const n=new Date().getDay();let d=(t-n+7)%7;if(d===0)d=7;return d}
 
 /* ================= CHIPS ================= */
+let selectedProduct='';
 document.querySelectorAll('#chanChips .chip').forEach(c=>c.addEventListener('click',()=>selChan(c.dataset.ch)));
 function selChan(ch){selectedChan=ch;
   document.querySelectorAll('#chanChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.ch===ch))}
+document.querySelectorAll('#prodChips .chip').forEach(c=>c.addEventListener('click',()=>selProduct(c.dataset.prod)));
+function selProduct(p){selectedProduct=p;
+  document.querySelectorAll('#prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===p))}
 document.querySelectorAll('#whenChips .chip').forEach(c=>c.addEventListener('click',()=>setWhenDays(parseInt(c.dataset.days))));
 function setWhenDays(days){selectedDays=days;
   const d=new Date();d.setDate(d.getDate()+days);$('f_when').value=isoOf(d);
   document.querySelectorAll('#whenChips .chip').forEach(c=>c.classList.toggle('on',parseInt(c.dataset.days)===days))}
-
-$('manualToggle').addEventListener('click',()=>$('fields').classList.toggle('show'));
 
 /* ================= SAVE ================= */
 $('saveBtn').addEventListener('click',()=>{
@@ -529,9 +597,10 @@ $('saveBtn').addEventListener('click',()=>{
   const lead={id:Date.now(),biz,town:$('f_town').value.trim(),spoke:$('f_spoke').value.trim(),
     owner:$('f_owner').value.trim(),phone:$('f_phone').value.trim(),
     email:$('f_email').value.trim(),insta:$('f_insta').value.trim().replace(/^@/,''),
+    product:selectedProduct||'Multi-Link',
     said:$('f_said').value.trim(),next:$('f_next').value.trim(),channel:selectedChan,
     when:firstDate, pitchDate:firstDate, created:new Date().toISOString(),
-    stage:0,dead:false,done:false,lastContact:''};
+    stage:0,dead:false,replied:false,lastContact:''};
   const a=store.all();a.unshift(lead);store.save(a);
   pushToSheet(lead);
   clearForm();render();toast('Saved ✓');
@@ -542,17 +611,17 @@ function clearForm(){
   ['f_biz','f_town','f_spoke','f_owner','f_phone','f_email','f_insta','f_said','f_next','f_when']
     .forEach(id=>{$(id).value='';});
   $('f_phone').placeholder='07…';
-  selectedChan='';selectedDays=null;
+  selectedChan='';selectedDays=null;selectedProduct='';
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
   $('transcript').classList.remove('show');$('transcriptText').textContent='';
-  $('fields').classList.remove('show');$('micLabel').textContent='Tap to talk';
+  $('micLabel').textContent='🎤 Fill by voice instead';
 }
 
 /* ================= MESSAGE FILL ================= */
 function fill(str,l){
   const name=(l.owner||l.spoke||'there').replace(/\s*\(owner\)\s*/i,'').trim()||'there';
   return str.replace(/{name}/g,name).replace(/{business}/g,l.biz||'your shop')
-            .replace(/{town}/g,l.town||'').replace(/{link}/g,productLink());
+            .replace(/{town}/g,l.town||'').replace(/{link}/g,linkForLead(l));
 }
 /* the message for a lead = the funnel entry at its current stage */
 function messageFor(l){
@@ -573,8 +642,10 @@ function mailLink(l){
 /* ================= ACTIONS ================= */
 window.markReplied=function(id){
   const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
-  l.done=true;l.repliedAt=new Date().toISOString();
-  store.save(a);pushToSheet(l);render();toast('Nice — marked as replied ✓');
+  l.replied=!l.replied;                       // toggle — stays in the list either way
+  if(l.replied)l.repliedAt=new Date().toISOString();
+  store.save(a);pushToSheet(l);render();
+  toast(l.replied?'Marked replied — still in your list ✓':'Reply mark removed');
 };
 window.noResponse=function(id){
   const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
@@ -610,27 +681,31 @@ function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 function leadCard(l,showActions){
   const w=fmtWhen(l.when,l.dead);
   const name=esc(l.owner||l.spoke||'');
-  const hasP=!!l.phone,hasE=!!l.email;
+  const hasP=!!l.phone,hasE=!!l.email,hasI=!!l.insta;
+  const since=daysSinceFirst(l);
   return `<div class="lead ${w.cls}${l.dead?' dead':''}">
     <div class="top">
-      <div><div class="biz">${esc(l.biz)}</div><div class="town">${esc(l.town||'')}</div></div>
+      <div><div class="biz">${esc(l.biz)}${l.replied?'<span class="rbadge">Replied</span>':''}</div>
+      <div class="town">${esc(l.town||'')}${l.product?' · '+esc(l.product):''}</div></div>
       <div class="when ${w.cls}">${w.label}</div>
     </div>
     ${name?`<div class="meta"><b>${name}</b>${l.phone?' · '+esc(l.phone):''}</div>`:''}
     ${l.said?`<div class="said">"${esc(l.said)}"</div>`:''}
     ${l.next?`<div class="next">→ ${esc(l.next)}</div>`:''}
-    <div class="stagebar">${stageLabel(l)}</div>
+    <div class="stagebar">${stageLabel(l)}${since?' · '+since:''}</div>
     ${showActions&&!l.dead?`
     <div class="contactrow">
       ${hasP?`<a class="cbtn text" href="${smsLink(l)}">Text</a>`:`<span class="cbtn off">No number</span>`}
       ${hasE?`<a class="cbtn email" href="${mailLink(l)}">Email</a>`:`<span class="cbtn off">No email</span>`}
-      <button class="cbtn insta" onclick="instaOpen(${l.id})">Instagram</button>
+      ${hasI?`<button class="cbtn insta" onclick="instaOpen(${l.id})">Instagram</button>`:`<span class="cbtn off">No Insta</span>`}
     </div>
     <div class="resprow">
-      <button class="rbtn replied" onclick="markReplied(${l.id})">Replied ✓</button>
-      <button class="rbtn" onclick="noResponse(${l.id})">No response</button>
-      <button class="rbtn dead" onclick="killLead(${l.id})">Stop</button>
-    </div>`:''}
+      <button class="rbtn r-replied${l.replied?' active':''}" onclick="markReplied(${l.id})">Replied ✓</button>
+      <button class="rbtn r-noresp" onclick="noResponse(${l.id})">No response</button>
+      <button class="rbtn r-stop" onclick="killLead(${l.id})">Stop</button>
+    </div>
+    <button class="editbtn" onclick="openEdit(${l.id})">Edit details</button>`:
+    (l.dead?`<button class="editbtn" onclick="openEdit(${l.id})">Edit / reopen</button>`:'')}
   </div>`;
 }
 /* instaOpen needs the lead object */
@@ -645,21 +720,21 @@ window.instaOpen=function(id){
 
 function render(){
   const all=store.all();
-  const open=all.filter(x=>!x.done&&!x.dead);
+  const open=all.filter(x=>!x.dead);
   const today=new Date();today.setHours(0,0,0,0);
   const due=open.filter(l=>l.when&&new Date(l.when+'T00:00:00')<=today);
   due.sort((a,b)=>(a.when||'').localeCompare(b.when||''));
 
   $('count').textContent=open.length;
   $('bToday').textContent=due.length;
-  $('bAll').textContent=all.filter(x=>!x.done).length;
+  $('bAll').textContent=all.length;
   $('statDue').textContent=due.length;
   $('statOpen').textContent=open.length;
 
   $('todayList').innerHTML=due.length?due.map(l=>leadCard(l,true)).join(''):
     '<div class="empty">Nothing due today.<br>Enjoy it — or log a new lead ↑</div>';
 
-  const sorted=all.filter(x=>!x.done).sort((a,b)=>{
+  const sorted=all.slice().sort((a,b)=>{
     if(a.dead!==b.dead)return a.dead?1:-1;
     return (a.when||'9999').localeCompare(b.when||'9999')});
   $('allList').innerHTML=sorted.length?sorted.map(l=>leadCard(l,true)).join(''):
@@ -680,10 +755,52 @@ function switchView(v){
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
 
+/* ================= EDIT LEAD ================= */
+let editingId=null, editProduct='';
+window.openEdit=function(id){
+  const l=store.all().find(x=>x.id===id);if(!l)return;
+  editingId=id;
+  $('e_biz').value=l.biz||'';$('e_town').value=l.town||'';$('e_phone').value=l.phone||'';
+  $('e_spoke').value=l.spoke||'';$('e_owner').value=l.owner||'';$('e_email').value=l.email||'';
+  $('e_insta').value=l.insta||'';$('e_said').value=l.said||'';$('e_next').value=l.next||'';
+  $('e_pitch').value=l.pitchDate||l.when||'';
+  editProduct=l.product||'';
+  document.querySelectorAll('#e_prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===editProduct));
+  $('editReopen').style.display=l.dead?'block':'none';
+  $('editModal').classList.add('on');
+};
+document.querySelectorAll('#e_prodChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  editProduct=c.dataset.prod;
+  document.querySelectorAll('#e_prodChips .chip').forEach(x=>x.classList.toggle('on',x.dataset.prod===editProduct));
+}));
+$('editClose').addEventListener('click',()=>$('editModal').classList.remove('on'));
+$('editSave').addEventListener('click',()=>{
+  const a=store.all();const l=a.find(x=>x.id===editingId);if(!l)return;
+  l.biz=$('e_biz').value.trim();l.town=$('e_town').value.trim();l.phone=$('e_phone').value.trim();
+  l.spoke=$('e_spoke').value.trim();l.owner=$('e_owner').value.trim();l.email=$('e_email').value.trim();
+  l.insta=$('e_insta').value.trim().replace(/^@/,'');l.said=$('e_said').value.trim();
+  l.next=$('e_next').value.trim();l.product=editProduct||l.product||'Multi-Link';
+  // if pitch date changed, re-anchor the current stage's due date
+  const newPitch=$('e_pitch').value;
+  if(newPitch && newPitch!==l.pitchDate){
+    l.pitchDate=newPitch;
+    const F=funnel();const st=l.stage||0;
+    if(!l.dead) l.when=isoOf(addDays(new Date(newPitch+'T00:00:00'),F[st].offset));
+  }
+  store.save(a);pushToSheet(l);$('editModal').classList.remove('on');render();toast('Lead updated ✓');
+});
+$('editReopen').addEventListener('click',()=>{
+  const a=store.all();const l=a.find(x=>x.id===editingId);if(!l)return;
+  l.dead=false;
+  const F=funnel();const st=l.stage||0;
+  const pitch=l.pitchDate?new Date(l.pitchDate+'T00:00:00'):new Date();
+  l.when=isoOf(addDays(pitch,F[st].offset));
+  store.save(a);pushToSheet(l);$('editModal').classList.remove('on');render();toast('Reopened ✓');
+});
+
 /* ================= TEMPLATES / SEQUENCE ================= */
 $('tplBtn').addEventListener('click',()=>{
   const F=funnel();
-  $('t_link').value=productLink();
   $('t_emailsub').value=emailSubject();
   $('t_c0').value=F[0].msg;$('t_c1').value=F[1].msg;
   $('t_c2').value=F[2].msg;$('t_c3').value=F[3].msg;
@@ -692,7 +809,6 @@ $('tplBtn').addEventListener('click',()=>{
 $('tplClose').addEventListener('click',()=>$('tplModal').classList.remove('on'));
 $('tplSave').addEventListener('click',()=>{
   const c=cfg.get();
-  c.link=$('t_link').value.trim();
   c.emailsub=$('t_emailsub').value;
   // preserve the offsets/names, only swap the message text
   c.funnel=FUNNEL.map((f,i)=>Object.assign({},f,{msg:$('t_c'+i).value}));
@@ -741,7 +857,7 @@ $('exportBtn').addEventListener('click',()=>{
   const cols=['Business','Town','Spoke to','Owner/DM','Phone','Email','Instagram','What they said',
     'Next action','Channel','Follow-up date','Stage','Dead','Replied','Logged'];
   const rows=a.map(l=>[l.biz,l.town,l.spoke,l.owner,l.phone,l.email,l.insta,l.said,l.next,
-    l.channel,l.when,stageLabel(l),l.dead?'Yes':'No',l.done?'Yes':'No',
+    l.channel,l.when,stageLabel(l),l.dead?'Yes':'No',l.replied?'Yes':'No',
     new Date(l.created).toLocaleString('en-GB')]);
   const csv=[cols,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
