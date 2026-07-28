@@ -249,7 +249,7 @@
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· e</b></div></div>
+    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· f</b></div></div>
   </div>
   <div class="pill" id="count">0</div>
 </div>
@@ -374,6 +374,7 @@
   </div>
   <div class="sec"><h3>Message them</h3>
     <button class="exp" id="outMsgBtn">Openers</button></div>
+  <div style="font-size:11.5px;font-weight:700;color:var(--ink-soft);margin:-4px 6px 10px" id="outBatchHead">0 left to contact</div>
   <div id="outList"></div>
 </div>
 
@@ -416,10 +417,13 @@
   <div class="sheet">
     <button class="close" id="outMsgClose">×</button>
     <h3>Your openers</h3>
-    <div class="sub">The app rotates through these so your outbound doesn't look templated. The Instagram button copies one and opens their profile to paste. Tokens: {name} {business} {category}</div>
-    <div class="tpl"><label>Opener 1</label><textarea id="o_0" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Opener 2</label><textarea id="o_1" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Opener 3</label><textarea id="o_2" style="min-height:120px"></textarea></div>
+    <div class="sub">The app rotates through these Instagram openers so your outbound doesn't look templated. Text & email get their own versions (below) with links, since cold text/email recipients don't know who you are.</div>
+    <div class="tpl"><label>Instagram opener 1</label><textarea id="o_0" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Instagram opener 2</label><textarea id="o_1" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Instagram opener 3</label><textarea id="o_2" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Text / SMS opener (includes links)</label><textarea id="o_text" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Email subject</label><textarea id="o_emailsub" style="min-height:44px"></textarea></div>
+    <div class="tpl"><label>Email opener (includes links)</label><textarea id="o_email" style="min-height:150px"></textarea></div>
     <div class="tpl"><label>The 3 questions (sent after they reply)</label><textarea id="o_q" style="min-height:120px"></textarea></div>
     <div class="sub" style="margin:6px 0 12px">Follow-up chases (if they don't reply):</div>
     <div class="tpl"><label>Chase 1 — 1 day after first message</label><textarea id="o_ch0" style="min-height:90px"></textarea></div>
@@ -987,7 +991,15 @@ const COLD_LADDER=[
 ];
 function coldChases(){ const c=cfg.get(); return (c.coldChases&&c.coldChases.length===3)?c.coldChases:COLD_LADDER; }
 
+/* Text & Email openers: recipient has NO context, so these introduce TapMate + links. */
+const DEFAULT_TEXT_OPENER="Hi, hope you don't mind me texting! I'm Jamie, 26 from Sheffield — I run TapMate, we help local businesses get more Google reviews and social followers with a simple tap plate. You can see what we do at www.tapmate.net or @tapmateuk on Instagram. Would you be up for answering 3 quick one-word questions? Would really help me out — no worries if you're busy!";
+const DEFAULT_EMAIL_OPENER="Hi,\n\nHope you don't mind me getting in touch! I'm Jamie, 26 from Sheffield, and I run a little business called TapMate. We help local businesses get more Google reviews and social media followers using a simple NFC tap plate — one tap and a customer can leave you a review, follow you, or find your details.\n\nYou can see what we do here:\nWebsite: www.tapmate.net\nInstagram: www.instagram.com/tapmateuk\n\nI'm trying to learn from actual business owners, so — would you be up for answering 3 quick one-word questions? It would genuinely help me a lot, and totally fine if you're too busy.\n\nThanks so much,\nJamie — TapMate";
+const DEFAULT_EMAIL_SUBJECT="A quick hello from TapMate 👋";
+
 function openers(){ const c=cfg.get(); return (c.openers&&c.openers.length===3)?c.openers:DEFAULT_OPENERS; }
+function textOpener(){ return cfg.get().textOpener || DEFAULT_TEXT_OPENER; }
+function emailOpener(){ return cfg.get().emailOpener || DEFAULT_EMAIL_OPENER; }
+function coldEmailSubject(){ return cfg.get().coldEmailSubject || DEFAULT_EMAIL_SUBJECT; }
 function questions(){ return cfg.get().questions || DEFAULT_QUESTIONS; }
 function dailyTarget(){ return cfg.get().outTarget || 20; }
 function todayStr(){ return isoOf(new Date()); }
@@ -1031,7 +1043,8 @@ function importProspects(text){
     existing.push({id:Date.now()+''+Math.floor(Math.random()*1e6),
       biz:p.biz,name:'',cat:p.cat,addr:p.addr,
       ig:p.ig.replace(/\/$/,''),phone:p.phone,email:p.email,web:p.web,
-      group:Math.random()<0.5?'comment':'dm',rot:Math.floor(Math.random()*3),
+      group: p.ig ? (Math.random()<0.5?'comment':'dm') : 'none',  // A/B only for IG-reachable
+      rot:Math.floor(Math.random()*3),
       status:'new',commented:false,assignedDate:'',sentDate:'',repliedAt:''});
     added++;
   });
@@ -1040,7 +1053,9 @@ function importProspects(text){
 }
 function todaysBatch(){
   const all=oStore.all();const today=todayStr();
-  let batch=all.filter(p=>p.assignedDate===today);
+  // Anything still 'new' AND already assigned (from today or a previous day) stays in the batch —
+  // uncontacted leads roll over instead of being stranded.
+  let batch=all.filter(p=>p.status==='new'&&p.assignedDate);
   if(batch.length<dailyTarget()){
     const need=dailyTarget()-batch.length;
     const pool=all.filter(p=>p.status==='new'&&!p.assignedDate);
@@ -1048,17 +1063,19 @@ function todaysBatch(){
     pool.slice(0,need).forEach(p=>{p.assignedDate=today;batch.push(p);});
     oStore.save(all);
   }
-  return all.filter(p=>p.assignedDate===today);
+  return batch;
 }
 function renderOutreach(){
   const all=oStore.all();
   const today=todayStr();const tD=new Date(today+'T00:00:00');
   const batch=todaysBatch();const target=dailyTarget();
-  const doneToday=batch.filter(p=>p.status!=='new').length;
-  const pct=target?Math.min(100,Math.round(doneToday/target*100)):0;
+  // "done today" = leads whose first message was sent today
+  const sentToday=all.filter(p=>p.sentDate===today).length;
+  const pct=target?Math.min(100,Math.round(sentToday/target*100)):0;
   $('outProgBar').style.width=pct+'%';
-  $('outProgTxt').textContent=doneToday+' / '+target;
-  $('bOut').textContent=all.filter(p=>p.status==='new').length;
+  $('outProgTxt').textContent=sentToday+' / '+target;
+  const neverContacted=all.filter(p=>p.status==='new').length;
+  $('bOut').textContent=neverContacted;
 
   // 1) Chases due today or overdue
   const chaseDue=all.filter(p=>p.status==='chasing'&&p.nextChase&&new Date(p.nextChase+'T00:00:00')<=tD);
@@ -1075,11 +1092,14 @@ function renderOutreach(){
     $('outReplyList').innerHTML=replied.map(p=>oCard(p,'replied')).join('');
   } else $('outReplySec').style.display='none';
 
-  // 3) Fresh daily batch
+  // 3) Daily batch (rolls over uncontacted; tops up to target)
   const remaining=batch.filter(p=>p.status==='new');
   const list=$('outList');
+  const totalLeft=all.filter(p=>p.status==='new').length;
+  const secHead=$('outBatchHead');
+  if(secHead)secHead.textContent=totalLeft+' left to contact';
   if(!all.length){list.innerHTML='<div class="empty">No prospects yet.<br>Tap “Import CSV” above to load your list ↑</div>';return;}
-  if(!remaining.length){list.innerHTML='<div class="empty">All '+target+' new ones done today 🎉<br>Fresh batch tomorrow. Any chases due show up above.</div>';return;}
+  if(!remaining.length){list.innerHTML='<div class="empty">Nothing waiting to contact 🎉<br>Import more, or work any chases due above.</div>';return;}
   list.innerHTML=remaining.map(p=>oCard(p,'new')).join('');
 }
 function igUrlOf(p){
@@ -1093,18 +1113,26 @@ function oCard(p,mode){
 
   // header badge depends on mode
   let badge='';
-  if(mode==='new')badge=p.group==='comment'?'<span class="obadge comment">Comment first</span>':'<span class="obadge dm">DM only</span>';
+  if(mode==='new'){
+    if(p.group==='comment')badge='<span class="obadge comment">Comment first</span>';
+    else if(p.group==='dm')badge='<span class="obadge dm">DM only</span>';
+    // group 'none' (no Instagram) gets no A/B badge
+  }
   else if(mode==='chase'){const cs=L[p.cstage||0];badge='<span class="obadge comment">'+cs.name+'</span>';}
   else if(mode==='replied')badge='<span class="obadge done">Replied</span>';
 
-  // which message the Instagram button copies
-  const copyMsg = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : openerFor(p);
+  // messages per channel
+  const igMsg  = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : openerFor(p);
+  const txtMsg = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : textOpener();
+  const emlBody= mode==='chase' ? oFill(L[p.cstage||0].msg,p) : emailOpener();
+  const emlSub = coldEmailSubject();
+  const smsSep = /iPhone|iPad|Macintosh/.test(navigator.userAgent)?'&':'?';
 
-  // contact buttons (same for all modes)
+  // contact buttons — each opens its own channel-appropriate message
   const contacts=`<div class="contactrow">
     ${igUrl?`<button class="cbtn insta" onclick="oInsta('${p.id}','${mode}')">Instagram</button>`:`<span class="cbtn off">No Insta</span>`}
-    ${phoneClean?`<a class="cbtn text" href="sms:${phoneClean}">Text</a>`:`<span class="cbtn off">No number</span>`}
-    ${p.email?`<a class="cbtn email" href="mailto:${p.email}?body=${encodeURIComponent(copyMsg)}">Email</a>`:`<span class="cbtn off">No email</span>`}
+    ${phoneClean?`<a class="cbtn text" href="sms:${phoneClean}${smsSep}body=${encodeURIComponent(txtMsg)}">Text</a>`:`<span class="cbtn off">No number</span>`}
+    ${p.email?`<a class="cbtn email" href="mailto:${p.email}?subject=${encodeURIComponent(emlSub)}&body=${encodeURIComponent(emlBody)}">Email</a>`:`<span class="cbtn off">No email</span>`}
   </div>`;
 
   // action row depends on mode
@@ -1198,11 +1226,15 @@ $('outClearAll').addEventListener('click',()=>{if(confirm('Delete ALL outreach p
 $('outSettingsBtn').addEventListener('click',()=>{$('outTarget').value=dailyTarget();$('outSettingsModal').classList.add('on');});
 $('outSettingsClose').addEventListener('click',()=>$('outSettingsModal').classList.remove('on'));
 $('outTargetSave').addEventListener('click',()=>{const n=parseInt($('outTarget').value)||20;const c=cfg.get();c.outTarget=Math.max(5,Math.min(100,n));cfg.set(c);$('outSettingsModal').classList.remove('on');renderOutreach();toast('Target set to '+c.outTarget);});
-$('outMsgBtn').addEventListener('click',()=>{const O=openers();$('o_0').value=O[0];$('o_1').value=O[1];$('o_2').value=O[2];$('o_q').value=questions();
+$('outMsgBtn').addEventListener('click',()=>{const O=openers();$('o_0').value=O[0];$('o_1').value=O[1];$('o_2').value=O[2];
+  $('o_text').value=textOpener();$('o_emailsub').value=coldEmailSubject();$('o_email').value=emailOpener();
+  $('o_q').value=questions();
   const L=coldChases();$('o_ch0').value=L[0].msg;$('o_ch1').value=L[1].msg;$('o_ch2').value=L[2].msg;
   $('outMsgModal').classList.add('on');});
 $('outMsgClose').addEventListener('click',()=>$('outMsgModal').classList.remove('on'));
-$('outMsgSave').addEventListener('click',()=>{const c=cfg.get();c.openers=[$('o_0').value,$('o_1').value,$('o_2').value];c.questions=$('o_q').value;
+$('outMsgSave').addEventListener('click',()=>{const c=cfg.get();c.openers=[$('o_0').value,$('o_1').value,$('o_2').value];
+  c.textOpener=$('o_text').value;c.coldEmailSubject=$('o_emailsub').value;c.emailOpener=$('o_email').value;
+  c.questions=$('o_q').value;
   c.coldChases=COLD_LADDER.map((x,i)=>Object.assign({},x,{msg:$('o_ch'+i).value}));
   cfg.set(c);$('outMsgModal').classList.remove('on');toast('Messages saved ✓');});
 $('outStatsBtn').addEventListener('click',()=>{
