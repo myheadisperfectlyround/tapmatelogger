@@ -48,7 +48,7 @@
     padding:6px;background:var(--glass);backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);
     border-radius:18px;box-shadow:var(--shadow-soft)}
-  .tab{flex:1;text-align:center;padding:11px 6px;border-radius:13px;font-size:12.5px;
+  .tab{flex:1;text-align:center;padding:11px 4px;border-radius:12px;font-size:11.5px;
     font-weight:800;color:var(--ink-soft);cursor:pointer;transition:all .18s ease;
     display:flex;align-items:center;justify-content:center;gap:6px}
   .tab.on{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
@@ -188,6 +188,18 @@
     font-size:11.5px;font-weight:700;cursor:pointer;padding:6px;text-decoration:underline;
     text-underline-offset:2px}
 
+  .progwrap{height:12px;background:rgba(120,110,160,.14);border-radius:8px;margin-top:10px;overflow:hidden}
+  .progbar{height:100%;width:0%;border-radius:8px;
+    background:linear-gradient(90deg,#a7c4f6,#7a63d6);transition:width .4s ease}
+  .miniβtn{flex:1;border:1px solid rgba(120,110,160,.2);background:rgba(255,255,255,.6);
+    border-radius:12px;padding:10px 6px;font-size:11.5px;font-weight:800;color:var(--ink-soft);
+    cursor:pointer}
+  .obadge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    padding:2px 7px;border-radius:8px;margin-left:8px;vertical-align:middle}
+  .obadge.comment{background:#e5ddf7;color:#5b4fb0}
+  .obadge.dm{background:#e3eef7;color:#3f6ea5}
+  .obadge.done{background:#c8efdd;color:#1d6647}
+
   .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:34px 14px;
     line-height:1.7;font-weight:500}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
@@ -237,15 +249,16 @@
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· c</b></div></div>
+    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· e</b></div></div>
   </div>
   <div class="pill" id="count">0</div>
 </div>
 
 <div class="tabs">
   <div class="tab on" data-view="today">Today <span class="badge" id="bToday">0</span></div>
-  <div class="tab" data-view="capture">Log new</div>
+  <div class="tab" data-view="capture">Log</div>
   <div class="tab" data-view="all">All <span class="badge" id="bAll">0</span></div>
+  <div class="tab" data-view="outreach">Outreach <span class="badge" id="bOut">0</span></div>
 </div>
 
 <!-- TODAY -->
@@ -333,6 +346,87 @@
   <div id="allList"></div>
   <button class="btnghost" id="syncBtn">Back up to Google Sheets</button>
   <div class="syncnote" id="syncNote">Not connected. Tap “Back up to Google Sheets” to set it up, or use Export CSV any time.</div>
+</div>
+
+<!-- OUTREACH -->
+<div class="view" id="v-outreach">
+  <!-- progress -->
+  <div class="card clay" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div class="eyebrow">Today's outreach</div>
+      <div style="font-size:12px;font-weight:800;color:var(--ink-soft)" id="outProgTxt">0 / 20</div>
+    </div>
+    <div class="progwrap"><div class="progbar" id="outProgBar"></div></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="miniβtn" id="outSettingsBtn">⚙ Daily target</button>
+      <button class="miniβtn" id="outImportBtn">⬆ Import CSV</button>
+      <button class="miniβtn" id="outStatsBtn">📊 A/B stats</button>
+    </div>
+  </div>
+
+  <div id="outChaseSec" style="display:none">
+    <div class="sec"><h3>⏰ Chase these</h3></div>
+    <div id="outChaseList"></div>
+  </div>
+  <div id="outReplySec" style="display:none">
+    <div class="sec"><h3>💬 Replied — your move</h3></div>
+    <div id="outReplyList"></div>
+  </div>
+  <div class="sec"><h3>Message them</h3>
+    <button class="exp" id="outMsgBtn">Openers</button></div>
+  <div id="outList"></div>
+</div>
+
+<!-- OUTREACH IMPORT MODAL -->
+<div class="modal" id="outImportModal">
+  <div class="sheet">
+    <button class="close" id="outImportClose">×</button>
+    <h3>Import prospects</h3>
+    <div class="sub">Pick your CSV. Columns expected: Business Name, Address, Category, Rating, Instagram, Phone, Email, Website. Rows with no Instagram, phone or email are skipped. Re-importing skips duplicates (matched on business + Instagram).</div>
+    <input type="file" id="outFile" accept=".csv,text/csv" style="width:100%;padding:14px;border:1px dashed rgba(120,110,160,.35);border-radius:15px;background:#fff;font-family:inherit;font-size:14px;margin-bottom:10px">
+    <div class="syncnote" id="outImportResult" style="display:none"></div>
+    <button class="btnghost" id="outClearAll" style="color:#b13c3c;margin-top:14px">Clear all outreach prospects</button>
+  </div>
+</div>
+
+<!-- OUTREACH SETTINGS MODAL -->
+<div class="modal" id="outSettingsModal">
+  <div class="sheet">
+    <button class="close" id="outSettingsClose">×</button>
+    <h3>Daily target</h3>
+    <div class="sub">How many prospects to work each day. Start conservative (20) on a healthy account and raise it gradually as things stay stable — sudden jumps in cold DMs are what triggers Instagram limits.</div>
+    <div class="tpl"><label>Prospects per day</label>
+      <input id="outTarget" type="number" min="5" max="100" style="width:100%;border:1px solid rgba(120,110,160,.16);border-radius:15px;padding:12px 14px;font-size:16px;background:#fff;font-family:inherit;font-weight:600"></div>
+    <button class="btnfull" id="outTargetSave">Save</button>
+  </div>
+</div>
+
+<!-- OUTREACH STATS MODAL -->
+<div class="modal" id="outStatsModal">
+  <div class="sheet">
+    <button class="close" id="outStatsClose">×</button>
+    <h3>Comment A/B test</h3>
+    <div class="sub">Half your prospects are randomly flagged to comment on their post first; half are DM-only. This compares reply rates so you can see whether commenting is worth the effort. Give it 100+ in each group before trusting it.</div>
+    <div id="outStatsBody"></div>
+  </div>
+</div>
+
+<!-- OUTREACH OPENERS MODAL -->
+<div class="modal" id="outMsgModal">
+  <div class="sheet">
+    <button class="close" id="outMsgClose">×</button>
+    <h3>Your openers</h3>
+    <div class="sub">The app rotates through these so your outbound doesn't look templated. The Instagram button copies one and opens their profile to paste. Tokens: {name} {business} {category}</div>
+    <div class="tpl"><label>Opener 1</label><textarea id="o_0" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Opener 2</label><textarea id="o_1" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>Opener 3</label><textarea id="o_2" style="min-height:120px"></textarea></div>
+    <div class="tpl"><label>The 3 questions (sent after they reply)</label><textarea id="o_q" style="min-height:120px"></textarea></div>
+    <div class="sub" style="margin:6px 0 12px">Follow-up chases (if they don't reply):</div>
+    <div class="tpl"><label>Chase 1 — 1 day after first message</label><textarea id="o_ch0" style="min-height:90px"></textarea></div>
+    <div class="tpl"><label>Chase 2 — 3 days after chase 1</label><textarea id="o_ch1" style="min-height:90px"></textarea></div>
+    <div class="tpl"><label>Breakup — 7 days after chase 2</label><textarea id="o_ch2" style="min-height:90px"></textarea></div>
+    <button class="btnfull" id="outMsgSave">Save messages</button>
+  </div>
 </div>
 
 <!-- TEMPLATE MODAL -->
@@ -751,6 +845,7 @@ function switchView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
   $('v-'+v).classList.add('on');
+  if(v==='outreach')renderOutreach();
   window.scrollTo(0,0);
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
@@ -866,8 +961,270 @@ $('exportBtn').addEventListener('click',()=>{
   toast('CSV exported');
 });
 
+/* ================= OUTREACH ================= */
+const oStore={
+  key:'tapmate_outreach_v1',
+  all(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
+  save(a){localStorage.setItem(this.key,JSON.stringify(a))}
+};
+const DEFAULT_OPENERS=[
+  "Hi, I hope you don't mind me messaging. I'm Jamie, 26 from Sheffield. At uni I started a project to help people get more reviews on Google and followers on social media. I was wondering if you'd be able to help me out by answering literally 3 quick one-word questions? It would really help, but I understand if you're busy and can't!",
+  "Hi! Hope you don't mind me messaging. I'm Jamie, 26 from Sheffield. At uni I started a little project helping businesses get more Google reviews and social followers. Could I ask you 3 quick one-word questions? Would really help me out — no worries at all if you're too busy!",
+  "Hi, hope it's okay to message! I'm Jamie, 26 from Sheffield. Bit of a random one — at uni I started a project helping businesses get more reviews and followers, and I'm trying to learn from actual owners. Could I ask you 3 quick one-word questions? Totally fine if not!"
+];
+const DEFAULT_QUESTIONS="Amazing, thank you! Here they are:\n\n1. Which do you care more about — social media followers or Google reviews?\n2. Do you actively ask customers to follow or review you?\n3. Do you reckon this is something businesses would pay a small amount monthly for, or would they only ever pay once?";
+
+/* Cold chase ladder: offsets are days AFTER the previous message.
+   chase 1 = 1 day after initial, chase 2 = 3 days after chase 1,
+   chase 3 (breakup) = 7 days after chase 2, then done. */
+const COLD_LADDER=[
+  {name:'Chase 1', gap:1,
+   msg:"Hi! Just floating this back up in case it got buried 😊 No worries if now's not a good time — even a one-word answer to those 3 questions would really help me out!"},
+  {name:'Chase 2', gap:3,
+   msg:"Hey, sorry to nudge again! I know you're busy. If it's easier I can just send over what I do in one message — or if it's not for you, totally fine to say so!"},
+  {name:'Breakup', gap:7,
+   msg:"No worries at all — I'll leave it here so I'm not clogging up your inbox! If you ever want to get more reviews or followers down the line, I'm only a message away. Wishing you and the business all the best 🙌"}
+];
+function coldChases(){ const c=cfg.get(); return (c.coldChases&&c.coldChases.length===3)?c.coldChases:COLD_LADDER; }
+
+function openers(){ const c=cfg.get(); return (c.openers&&c.openers.length===3)?c.openers:DEFAULT_OPENERS; }
+function questions(){ return cfg.get().questions || DEFAULT_QUESTIONS; }
+function dailyTarget(){ return cfg.get().outTarget || 20; }
+function todayStr(){ return isoOf(new Date()); }
+
+function oFill(str,p){
+  return str.replace(/{name}/g,'').replace(/{business}/g,p.biz||'')
+            .replace(/{category}/g,(p.cat||'').toLowerCase()).replace(/\s+\n/g,'\n').trim();
+}
+function openerFor(p){
+  const O=openers();const idx=(p.rot!=null?p.rot:0)%O.length;return oFill(O[idx],p);
+}
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length)return [];
+  const delim=lines[0].includes('\t')?'\t':',';
+  const rows=lines.map(l=>l.split(delim));
+  const header=rows[0].map(h=>h.toLowerCase().trim());
+  const col=n=>header.findIndex(h=>h.includes(n));
+  const ci={biz:col('business'),addr:col('address'),cat:col('categor'),
+    ig:col('instagram'),phone:col('phone'),email:col('email'),web:col('website')};
+  const out=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];const biz=(r[ci.biz]||'').trim();if(!biz)continue;
+    const ig=(ci.ig>=0?r[ci.ig]||'':'').trim();
+    const phone=(ci.phone>=0?r[ci.phone]||'':'').trim();
+    const email=(ci.email>=0?r[ci.email]||'':'').trim();
+    if(!ig&&!phone&&!email)continue;
+    out.push({biz,addr:(r[ci.addr]||'').trim(),cat:(r[ci.cat]||'').trim(),
+      ig,phone,email,web:(ci.web>=0?r[ci.web]||'':'').trim()});
+  }
+  return out;
+}
+function importProspects(text){
+  const parsed=parseCSV(text);const existing=oStore.all();
+  const seen=new Set(existing.map(p=>(p.biz+'|'+p.ig).toLowerCase()));
+  let added=0;
+  parsed.forEach(p=>{
+    const kkey=(p.biz+'|'+p.ig).toLowerCase();
+    if(seen.has(kkey))return;seen.add(kkey);
+    existing.push({id:Date.now()+''+Math.floor(Math.random()*1e6),
+      biz:p.biz,name:'',cat:p.cat,addr:p.addr,
+      ig:p.ig.replace(/\/$/,''),phone:p.phone,email:p.email,web:p.web,
+      group:Math.random()<0.5?'comment':'dm',rot:Math.floor(Math.random()*3),
+      status:'new',commented:false,assignedDate:'',sentDate:'',repliedAt:''});
+    added++;
+  });
+  oStore.save(existing);
+  return {added,total:parsed.length,skipped:parsed.length-added};
+}
+function todaysBatch(){
+  const all=oStore.all();const today=todayStr();
+  let batch=all.filter(p=>p.assignedDate===today);
+  if(batch.length<dailyTarget()){
+    const need=dailyTarget()-batch.length;
+    const pool=all.filter(p=>p.status==='new'&&!p.assignedDate);
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    pool.slice(0,need).forEach(p=>{p.assignedDate=today;batch.push(p);});
+    oStore.save(all);
+  }
+  return all.filter(p=>p.assignedDate===today);
+}
+function renderOutreach(){
+  const all=oStore.all();
+  const today=todayStr();const tD=new Date(today+'T00:00:00');
+  const batch=todaysBatch();const target=dailyTarget();
+  const doneToday=batch.filter(p=>p.status!=='new').length;
+  const pct=target?Math.min(100,Math.round(doneToday/target*100)):0;
+  $('outProgBar').style.width=pct+'%';
+  $('outProgTxt').textContent=doneToday+' / '+target;
+  $('bOut').textContent=all.filter(p=>p.status==='new').length;
+
+  // 1) Chases due today or overdue
+  const chaseDue=all.filter(p=>p.status==='chasing'&&p.nextChase&&new Date(p.nextChase+'T00:00:00')<=tD);
+  chaseDue.sort((a,b)=>(a.nextChase||'').localeCompare(b.nextChase||''));
+  if(chaseDue.length){
+    $('outChaseSec').style.display='block';
+    $('outChaseList').innerHTML=chaseDue.map(p=>oCard(p,'chase')).join('');
+  } else $('outChaseSec').style.display='none';
+
+  // 2) Replied — awaiting your action
+  const replied=all.filter(p=>p.status==='replied');
+  if(replied.length){
+    $('outReplySec').style.display='block';
+    $('outReplyList').innerHTML=replied.map(p=>oCard(p,'replied')).join('');
+  } else $('outReplySec').style.display='none';
+
+  // 3) Fresh daily batch
+  const remaining=batch.filter(p=>p.status==='new');
+  const list=$('outList');
+  if(!all.length){list.innerHTML='<div class="empty">No prospects yet.<br>Tap “Import CSV” above to load your list ↑</div>';return;}
+  if(!remaining.length){list.innerHTML='<div class="empty">All '+target+' new ones done today 🎉<br>Fresh batch tomorrow. Any chases due show up above.</div>';return;}
+  list.innerHTML=remaining.map(p=>oCard(p,'new')).join('');
+}
+function igUrlOf(p){
+  const h=(p.ig||'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,'').replace(/^@/,'');
+  return p.ig?(p.ig.startsWith('http')?p.ig:'https://instagram.com/'+h):'';
+}
+function oCard(p,mode){
+  const igUrl=igUrlOf(p);
+  const phoneClean=(p.phone||'').replace(/\s/g,'');
+  const L=coldChases();
+
+  // header badge depends on mode
+  let badge='';
+  if(mode==='new')badge=p.group==='comment'?'<span class="obadge comment">Comment first</span>':'<span class="obadge dm">DM only</span>';
+  else if(mode==='chase'){const cs=L[p.cstage||0];badge='<span class="obadge comment">'+cs.name+'</span>';}
+  else if(mode==='replied')badge='<span class="obadge done">Replied</span>';
+
+  // which message the Instagram button copies
+  const copyMsg = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : openerFor(p);
+
+  // contact buttons (same for all modes)
+  const contacts=`<div class="contactrow">
+    ${igUrl?`<button class="cbtn insta" onclick="oInsta('${p.id}','${mode}')">Instagram</button>`:`<span class="cbtn off">No Insta</span>`}
+    ${phoneClean?`<a class="cbtn text" href="sms:${phoneClean}">Text</a>`:`<span class="cbtn off">No number</span>`}
+    ${p.email?`<a class="cbtn email" href="mailto:${p.email}?body=${encodeURIComponent(copyMsg)}">Email</a>`:`<span class="cbtn off">No email</span>`}
+  </div>`;
+
+  // action row depends on mode
+  let actions='';
+  if(mode==='new'){
+    actions=`<div class="resprow">
+      <button class="rbtn r-replied" onclick="oReplied('${p.id}')">Replied ✓</button>
+      <button class="rbtn r-noresp" onclick="oDone('${p.id}')">Sent</button>
+      <button class="rbtn r-stop" onclick="oSkip('${p.id}')">Skip</button>
+    </div>`;
+  } else if(mode==='chase'){
+    const isBreakup=(p.cstage||0)>=L.length-1;
+    actions=`<div class="resprow">
+      <button class="rbtn r-replied" onclick="oReplied('${p.id}')">Replied ✓</button>
+      <button class="rbtn r-noresp" onclick="oChaseSent('${p.id}')">${isBreakup?'Breakup sent':'Chase sent'}</button>
+      <button class="rbtn r-stop" onclick="oNotInterested('${p.id}')">Not interested</button>
+    </div>`;
+  } else if(mode==='replied'){
+    actions=`<div class="resprow">
+      <button class="rbtn r-replied" onclick="oComplete('${p.id}')">Complete ✓</button>
+      <button class="rbtn r-stop" onclick="oNotInterested('${p.id}')">Not interested</button>
+    </div>`;
+  }
+
+  // context line
+  let ctx='';
+  if(mode==='new'&&p.group==='comment')ctx=`<div class="stagebar" style="color:#5b4fb0">💬 Leave a genuine comment on a recent post first, then DM</div>`;
+  else if(mode==='chase')ctx=`<div class="stagebar" style="color:#5b4fb0">Tap Instagram to copy the ${L[p.cstage||0].name.toLowerCase()} message & open their profile</div>`;
+  else if(mode==='replied')ctx=`<div class="stagebar" style="color:#1d6647">They replied — send your pitch, then mark Complete or Not interested</div>`;
+
+  return `<div class="lead">
+    <div class="top"><div><div class="biz">${esc(p.biz)}${badge}</div>
+      <div class="town">${esc(p.cat||'')}${p.addr?' · '+esc(p.addr):''}</div></div></div>
+    ${ctx}
+    ${contacts}
+    ${actions}
+  </div>`;
+}
+window.oInsta=function(id,mode){
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  const L=coldChases();
+  const msg=(mode==='chase')?oFill(L[p.cstage||0].msg,p):openerFor(p);
+  if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});
+  toast('Message copied — paste in the DM');
+  window.open(igUrlOf(p)||'https://instagram.com','_blank');
+};
+window.oDone=function(id){  // "Sent" — enters the chase ladder
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  p.status='chasing';p.cstage=0;p.sentDate=todayStr();p.lastMsg=todayStr();
+  const L=coldChases();
+  p.nextChase=isoOf(addDays(new Date(),L[0].gap));
+  oStore.save(all);renderOutreach();
+  toast('Sent — chase 1 set for '+new Date(p.nextChase+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
+};
+window.oChaseSent=function(id){  // advance to next chase after sending a chase
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  const L=coldChases();const cur=(p.cstage||0);
+  p.lastMsg=todayStr();
+  if(cur>=L.length-1){ p.status='nochase';p.nextChase=''; toast('Breakup sent — done chasing'); }
+  else { p.cstage=cur+1; p.nextChase=isoOf(addDays(new Date(),L[cur+1].gap)); 
+    toast('Chase sent — next set for '+new Date(p.nextChase+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})); }
+  oStore.save(all);renderOutreach();
+};
+window.oReplied=function(id){
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  p.status='replied';p.repliedAt=new Date().toISOString();if(!p.sentDate)p.sentDate=todayStr();
+  p.nextChase='';  // stop auto-chasing once they reply
+  oStore.save(all);renderOutreach();toast('Replied — logged for A/B stats ✓');
+};
+window.oComplete=function(id){
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  p.status='complete';p.nextChase='';oStore.save(all);renderOutreach();toast('Marked complete ✓');
+};
+window.oNotInterested=function(id){
+  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  p.status='notinterested';p.nextChase='';oStore.save(all);renderOutreach();toast('Marked not interested');
+};
+window.oSkip=function(id){const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
+  p.status='skipped';p.skipped=true;oStore.save(all);renderOutreach();toast('Skipped');};
+
+$('outImportBtn').addEventListener('click',()=>{$('outImportResult').style.display='none';$('outImportModal').classList.add('on');});
+$('outImportClose').addEventListener('click',()=>$('outImportModal').classList.remove('on'));
+$('outFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{const res=importProspects(rd.result);const el=$('outImportResult');el.style.display='block';
+    el.textContent=`Added ${res.added} new prospect${res.added===1?'':'s'}`+(res.skipped>0?` · skipped ${res.skipped} (duplicate or no contact method)`:'')+'.';
+    renderOutreach();};
+  rd.readAsText(f);
+});
+$('outClearAll').addEventListener('click',()=>{if(confirm('Delete ALL outreach prospects? This cannot be undone.')){oStore.save([]);renderOutreach();$('outImportModal').classList.remove('on');toast('Cleared');}});
+$('outSettingsBtn').addEventListener('click',()=>{$('outTarget').value=dailyTarget();$('outSettingsModal').classList.add('on');});
+$('outSettingsClose').addEventListener('click',()=>$('outSettingsModal').classList.remove('on'));
+$('outTargetSave').addEventListener('click',()=>{const n=parseInt($('outTarget').value)||20;const c=cfg.get();c.outTarget=Math.max(5,Math.min(100,n));cfg.set(c);$('outSettingsModal').classList.remove('on');renderOutreach();toast('Target set to '+c.outTarget);});
+$('outMsgBtn').addEventListener('click',()=>{const O=openers();$('o_0').value=O[0];$('o_1').value=O[1];$('o_2').value=O[2];$('o_q').value=questions();
+  const L=coldChases();$('o_ch0').value=L[0].msg;$('o_ch1').value=L[1].msg;$('o_ch2').value=L[2].msg;
+  $('outMsgModal').classList.add('on');});
+$('outMsgClose').addEventListener('click',()=>$('outMsgModal').classList.remove('on'));
+$('outMsgSave').addEventListener('click',()=>{const c=cfg.get();c.openers=[$('o_0').value,$('o_1').value,$('o_2').value];c.questions=$('o_q').value;
+  c.coldChases=COLD_LADDER.map((x,i)=>Object.assign({},x,{msg:$('o_ch'+i).value}));
+  cfg.set(c);$('outMsgModal').classList.remove('on');toast('Messages saved ✓');});
+$('outStatsBtn').addEventListener('click',()=>{
+  const all=oStore.all();
+  const SENT=['chasing','nochase','replied','complete','notinterested'];
+  const grp=g=>{const sent=all.filter(p=>p.group===g&&SENT.includes(p.status));
+    const replied=all.filter(p=>p.group===g&&(p.status==='replied'||p.status==='complete'));
+    return {sent:sent.length,replied:replied.length,rate:sent.length?Math.round(replied.length/sent.length*100):0};};
+  const c=grp('comment'),d=grp('dm');
+  $('outStatsBody').innerHTML=`
+    <div class="lead" style="margin-bottom:10px"><div class="biz">💬 Comment first</div>
+      <div class="meta" style="margin-top:8px">${c.replied} replies from ${c.sent} sent</div>
+      <div style="font-size:28px;font-weight:800;color:#5b4fb0;margin-top:4px">${c.rate}%</div></div>
+    <div class="lead"><div class="biz">📩 DM only</div>
+      <div class="meta" style="margin-top:8px">${d.replied} replies from ${d.sent} sent</div>
+      <div style="font-size:28px;font-weight:800;color:#3f6ea5;margin-top:4px">${d.rate}%</div></div>
+    <div class="syncnote" style="margin-top:12px">${(c.sent<30||d.sent<30)?'Keep going — you need ~100 in each group before these numbers mean much.':(c.rate>d.rate+3?'Commenting is winning so far. Worth the effort.':d.rate>c.rate+3?'DM-only is doing as well or better — commenting may not be worth the time.':'Too close to call yet.')}</div>`;
+  $('outStatsModal').classList.add('on');
+});
+$('outStatsClose').addEventListener('click',()=>$('outStatsModal').classList.remove('on'));
+
 updateSyncNote();
-render();
-</script>
+render();</script>
 </body>
 </html>
