@@ -5,497 +5,338 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>TapMate Field Log</title>
+<title>TapMate CRM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#eceaf4; --lav:#c8bff0; --blue:#bcd4f6; --mint:#c4ecdd;
-    --ink:#2b2740; --ink-soft:#6b6685; --charcoal:#221f33;
-    --card:rgba(255,255,255,.72); --card-solid:#fff;
-    --glass:rgba(255,255,255,.45);
-    --shadow-soft:0 2px 6px rgba(90,80,140,.06),0 12px 30px rgba(90,80,140,.10);
-    --shadow-clay:8px 8px 20px rgba(160,150,200,.28),-8px -8px 20px rgba(255,255,255,.9);
-    --r-lg:26px; --r-md:20px; --r-sm:15px;
+    --bg:#fafafa;
+    --surface:#ffffff;
+    --ink:#1a1a1a;
+    --ink-soft:#6e6e73;
+    --ink-faint:#9a9aa0;
+    --line:#ececec;
+    --line-strong:#e0e0e0;
+    --amber:#f59e0b;
+    --amber-deep:#d97706;
+    --amber-soft:#fff7ed;
+    --amber-line:#fde4c4;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.05),0 12px 28px rgba(0,0,0,.07);
+    --r-lg:18px; --r-md:14px; --r-sm:10px;
+    /* status colours — muted, one-note each */
+    --s-new:#3b6ea8;      --s-new-bg:#eef4fb;
+    --s-interested:#2f8f5b; --s-interested-bg:#ecf7f1;
+    --s-chasing:#d97706;  --s-chasing-bg:#fff7ed;
+    --s-won:#1a1a1a;      --s-won-bg:#f0f0f0;
+    --s-dead:#9a9aa0;     --s-dead-bg:#f4f4f5;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0;font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  html,body{margin:0;padding:0;
+    font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
     color:var(--ink);-webkit-font-smoothing:antialiased}
-  body{min-height:100vh;padding:0 14px 120px;
-    background:radial-gradient(120% 90% at 15% 0%,#e9e3fb 0%,transparent 55%),
-      radial-gradient(120% 90% at 90% 10%,#dce9fb 0%,transparent 50%),
-      radial-gradient(140% 100% at 50% 100%,#dcf2ea 0%,transparent 55%),var(--bg)}
+  body{min-height:100vh;padding:0 16px 96px;background:var(--bg)}
 
+  /* top bar */
   .topbar{position:sticky;top:0;z-index:30;
-    padding:calc(env(safe-area-inset-top,0px) + 16px) 4px 10px;
+    padding:calc(env(safe-area-inset-top,0px) + 16px) 2px 12px;
     display:flex;align-items:center;justify-content:space-between;
-    background:linear-gradient(180deg,var(--bg) 55%,rgba(236,234,244,0))}
+    background:var(--bg);border-bottom:1px solid transparent}
   .brand{display:flex;align-items:center;gap:11px}
-  .brand .logo{width:42px;height:42px;border-radius:14px;flex:none;
-    background:linear-gradient(140deg,#cabff2,#a9c3f5);box-shadow:var(--shadow-clay);
-    display:flex;align-items:center;justify-content:center}
-  .brand .logo svg{width:22px;height:22px}
-  .brand h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
-  .brand h1 span{color:var(--ink-soft);font-weight:600}
-  .brand .sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;font-weight:500}
-  .pill{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,.6);padding:9px 14px;border-radius:16px;
-    font-size:12.5px;font-weight:700;box-shadow:var(--shadow-soft);white-space:nowrap}
+  .brand .logo{width:38px;height:38px;border-radius:11px;flex:none;
+    background:var(--ink);display:flex;align-items:center;justify-content:center}
+  .brand .logo svg{width:20px;height:20px}
+  .brand .logo svg rect,.brand .logo svg path{stroke:#fff!important}
+  .brand .logo svg circle{fill:var(--amber)!important}
+  .brand h1{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em}
+  .brand h1 span{color:var(--ink-faint);font-weight:600}
+  .brand .sub{font-size:11px;color:var(--ink-faint);margin-top:1px;font-weight:500}
+  .brand .sub b{color:var(--amber-deep)}
+  .addbtn{background:var(--ink);color:#fff;border:none;border-radius:11px;
+    padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:-.01em}
+  .addbtn:active{transform:scale(.97)}
 
-  /* tabs */
-  .tabs{display:flex;gap:7px;margin:4px 0 14px;position:sticky;top:78px;z-index:29;
-    padding:6px;background:var(--glass);backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);
-    border-radius:18px;box-shadow:var(--shadow-soft)}
-  .tab{flex:1;text-align:center;padding:11px 4px;border-radius:12px;font-size:11.5px;
-    font-weight:800;color:var(--ink-soft);cursor:pointer;transition:all .18s ease;
-    display:flex;align-items:center;justify-content:center;gap:6px}
-  .tab.on{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
-    box-shadow:0 4px 12px rgba(40,32,70,.28)}
-  .tab .badge{background:rgba(255,255,255,.22);border-radius:9px;padding:1px 6px;font-size:10.5px}
-  .tab:not(.on) .badge{background:rgba(120,110,160,.15)}
+  /* bottom nav */
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 8px);
+    display:flex;gap:4px;background:var(--surface);border-top:1px solid var(--line)}
+  .navbtn{flex:1;text-align:center;padding:8px 4px;border:none;background:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;
+    font-size:10.5px;font-weight:700;color:var(--ink-faint)}
+  .navbtn svg{width:22px;height:22px;stroke:var(--ink-faint);fill:none;stroke-width:2}
+  .navbtn.on{color:var(--amber-deep)}
+  .navbtn.on svg{stroke:var(--amber-deep)}
+  .navbtn .nbadge{position:absolute;transform:translate(13px,-4px);
+    background:var(--amber);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;
+    border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 
   .view{display:none}.view.on{display:block}
 
-  .bento{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .cell{grid-column:span 2}.cell.half{grid-column:span 1}
-  .card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,.65);border-radius:var(--r-lg);
-    box-shadow:var(--shadow-soft);padding:18px}
-  .card.clay{background:var(--card-solid);box-shadow:var(--shadow-clay);border:none}
-  .card.dark{background:linear-gradient(150deg,#2c2842,#1e1b2e);color:#efeaff;border:none;
-    box-shadow:0 10px 30px rgba(40,32,70,.35)}
-  .card.dark .k{color:#c9c1ec}.card.dark .big{color:#fff}
-  .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--ink-soft)}
-  .stat .big{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:6px}
-  .stat .k{font-size:12px;color:var(--ink-soft);font-weight:600;margin-top:2px}
-  .ic{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center}
-  .ic.lav{background:linear-gradient(140deg,#d3c9f6,#b9a9f0)}
-  .ic svg{width:18px;height:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+    box-shadow:var(--shadow);padding:16px}
 
-  h2.title{margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em}
-  p.hint{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.55;font-weight:500}
+  .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--ink-faint)}
+  .sec{display:flex;align-items:center;justify-content:space-between;margin:24px 2px 12px}
+  .sec h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);font-weight:800}
+  .sec a{font-size:12px;font-weight:700;color:var(--amber-deep);text-decoration:none;cursor:pointer}
 
-  .micbtn{width:100%;margin-top:16px;border:none;cursor:pointer;border-radius:var(--r-md);
-    background:linear-gradient(140deg,#c6bcf3,#a7c4f6);color:#231f36;font-size:16px;
-    font-weight:800;padding:20px;display:flex;align-items:center;justify-content:center;gap:12px;
-    box-shadow:6px 6px 16px rgba(150,140,200,.32),-6px -6px 16px rgba(255,255,255,.85);
-    transition:transform .08s ease}
-  .micbtn:active{transform:scale(.98)}
-  .micbtn.recording{background:linear-gradient(140deg,#f5b7c4,#f0a5a5);color:#4a1f28}
-  .micbtn.secondary{background:rgba(255,255,255,.6);color:#5b4fb0;
-    border:1px solid rgba(120,110,160,.2);box-shadow:none;font-size:14px;padding:14px;margin-bottom:4px}
-  .micbtn.secondary:active{transform:scale(.98)}
-  .micbtn.secondary.recording{background:linear-gradient(140deg,#f5b7c4,#f0a5a5);color:#4a1f28;border-color:transparent}
-  .micbtn .dot{width:11px;height:11px;border-radius:50%;background:#231f36}
-  .micbtn.recording .dot{background:#4a1f28;animation:pulse 1s infinite}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
+  /* dashboard stat grid */
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+  .stat{border-radius:var(--r-md);padding:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .stat .n{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ink)}
+  .stat .k{font-size:11.5px;font-weight:600;margin-top:6px;color:var(--ink-soft)}
+  .stat.due{background:var(--amber);border-color:transparent}
+  .stat.due .n{color:#fff}.stat.due .k{color:#fff;opacity:.9}
+  .stat.won{background:var(--ink);border-color:transparent}
+  .stat.won .n{color:#fff}.stat.won .k{color:#fff;opacity:.7}
 
-  .transcript{margin-top:14px;font-size:13.5px;line-height:1.55;background:var(--glass);
-    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:var(--r-sm);
-    padding:13px 15px;display:none}
-  .transcript.show{display:block}
-  .transcript .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;
-    color:var(--ink-soft);font-weight:700;margin-bottom:6px}
-  .manual-toggle{display:block;width:100%;text-align:center;margin-top:13px;background:none;
-    border:none;color:#7a63d6;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px}
+  /* search + filters */
+  .searchbar{width:100%;border:1px solid var(--line-strong);border-radius:12px;
+    padding:13px 15px;font-size:15px;background:var(--surface);color:var(--ink);
+    font-family:inherit;font-weight:500;margin-bottom:12px}
+  .searchbar:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+  .searchbar::placeholder{color:var(--ink-faint)}
+  .filterrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+  .fchip{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;
+    padding:7px 13px;font-size:12px;font-weight:700;color:var(--ink-soft);cursor:pointer}
+  .fchip.on{background:var(--ink);color:#fff;border-color:transparent}
+  .sortrow{display:flex;gap:7px;align-items:center;margin:2px 2px 14px;font-size:11.5px;color:var(--ink-soft);font-weight:600}
+  .sortrow select{border:1px solid var(--line-strong);border-radius:9px;padding:6px 8px;
+    font-family:inherit;font-size:12px;font-weight:700;background:var(--surface);color:var(--ink)}
 
-  .fields{margin-top:4px;display:none}.fields.show{display:block}
-  .field{margin-bottom:12px}
-  .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;
-    color:var(--ink-soft);font-weight:700;margin-bottom:6px}
-  .field input,.field textarea{width:100%;border:1px solid rgba(120,110,160,.16);
-    border-radius:var(--r-sm);padding:12px 14px;font-size:15px;background:rgba(255,255,255,.7);
-    color:var(--ink);font-family:inherit;font-weight:500}
-  .field input:focus,.field textarea:focus{outline:none;border-color:#b3a4ec;
-    box-shadow:0 0 0 4px rgba(179,164,236,.18)}
-  .field textarea{resize:none;min-height:54px}
-  .field.two{display:flex;gap:10px}.field.two>div{flex:1}
+  /* prospect row */
+  .prow{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:15px;margin-bottom:9px;box-shadow:var(--shadow);cursor:pointer;
+    display:flex;align-items:center;gap:12px;transition:border-color .12s}
+  .prow:active{border-color:var(--line-strong)}
+  .prow .pmain{flex:1;min-width:0}
+  .prow .pbiz{font-weight:800;font-size:15px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .psub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .pright{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .sbadge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:7px}
+  .sbadge.new{background:var(--s-new-bg);color:var(--s-new)}
+  .sbadge.interested{background:var(--s-interested-bg);color:var(--s-interested)}
+  .sbadge.chasing{background:var(--s-chasing-bg);color:var(--s-chasing)}
+  .sbadge.won{background:var(--s-won-bg);color:var(--s-won)}
+  .sbadge.dead{background:var(--s-dead-bg);color:var(--s-dead)}
+  .pdue{font-size:10.5px;font-weight:700;color:var(--ink-faint)}
+  .pdue.ready{color:var(--amber-deep)}
 
-  .chips{display:flex;gap:7px;flex-wrap:wrap}
-  .chip{border:1px solid rgba(120,110,160,.18);background:rgba(255,255,255,.55);
-    border-radius:14px;padding:9px 13px;font-size:12.5px;font-weight:700;color:var(--ink-soft);
-    cursor:pointer;transition:all .15s ease}
-  .chip:active{transform:scale(.96)}
-  .chip.on{background:linear-gradient(140deg,#5b4fb0,#7a63d6);color:#fff;border-color:transparent;
-    box-shadow:0 4px 12px rgba(110,90,200,.3)}
-  .chip.today.on{background:linear-gradient(140deg,#2c2842,#221f33)}
+  .empty{text-align:center;color:var(--ink-faint);font-size:13px;padding:40px 16px;line-height:1.7;font-weight:500}
 
-  .actionrow{display:flex;gap:10px;margin-top:8px}
-  .actionrow button{flex:1;border:none;border-radius:var(--r-md);padding:16px;font-size:15px;
-    font-weight:800;cursor:pointer}
-  .save{background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;box-shadow:0 6px 16px rgba(40,32,70,.3)}
-  .clear{background:rgba(255,255,255,.6);color:var(--ink-soft);
-    border:1px solid rgba(120,110,160,.18)!important;flex:.55!important}
+  /* profile */
+  .pback{background:none;border:none;color:var(--ink-soft);font-size:14px;font-weight:700;cursor:pointer;
+    padding:8px 0;display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .phead{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+  .phead .pbizname{font-size:22px;font-weight:800;letter-spacing:-.025em}
+  .phead .pcat{font-size:13px;color:var(--ink-soft);font-weight:500;margin-top:3px}
+  .phead .statusrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+  .statuspick{border:1px solid var(--line-strong);background:var(--surface);border-radius:9px;
+    padding:7px 12px;font-size:11.5px;font-weight:700;color:var(--ink-soft);cursor:pointer}
+  .statuspick.on.new{background:var(--s-new);color:#fff;border-color:transparent}
+  .statuspick.on.interested{background:var(--s-interested);color:#fff;border-color:transparent}
+  .statuspick.on.chasing{background:var(--amber);color:#fff;border-color:transparent}
+  .statuspick.on.won{background:var(--ink);color:#fff;border-color:transparent}
+  .statuspick.on.dead{background:var(--s-dead);color:#fff;border-color:transparent}
 
-  .sec{display:flex;align-items:center;justify-content:space-between;margin:20px 6px 12px}
-  .sec h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.1em;
-    color:var(--ink-soft);font-weight:800}
-  .sec .exp{font-size:12px;font-weight:800;color:#7a63d6;background:var(--glass);
-    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.6);border-radius:12px;
-    padding:7px 13px;cursor:pointer}
+  .contactrow{display:flex;gap:8px;margin-top:16px}
+  .cbtn{flex:1;text-align:center;text-decoration:none;border:1px solid var(--line-strong);
+    border-radius:11px;padding:12px 6px;font-size:12px;font-weight:700;cursor:pointer;
+    color:var(--ink);background:var(--surface)}
+  .cbtn:active{background:var(--bg)}
+  .cbtn.off{color:var(--ink-faint);background:var(--bg)}
 
-  .lead{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,.6);border-radius:var(--r-md);padding:16px;margin-bottom:11px;
-    box-shadow:var(--shadow-soft);position:relative;overflow:hidden}
-  .lead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
-    background:linear-gradient(180deg,#c8bff0,#bcd4f6)}
-  .lead.due::before{background:linear-gradient(180deg,#f3d9b8,#eec48f)}
-  .lead.overdue::before{background:linear-gradient(180deg,#f4b8b8,#ee9a9a)}
-  .lead.dead{opacity:.55}
-  .lead.dead::before{background:linear-gradient(180deg,#c9c6d4,#b3afc2)}
-  .lead .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .lead .biz{font-weight:800;font-size:16px;letter-spacing:-.02em}
-  .lead .town{font-size:12px;color:var(--ink-soft);margin-top:2px;font-weight:600}
-  .lead .when{font-size:11px;font-weight:800;padding:6px 11px;border-radius:13px;white-space:nowrap;
-    background:rgba(200,191,240,.35);color:#5b4fb0}
-  .lead .when.due{background:rgba(240,200,140,.35);color:#a5710f}
-  .lead .when.overdue{background:rgba(240,160,160,.35);color:#b13c3c}
-  .lead .when.dead{background:rgba(160,155,180,.25);color:#5f5a70}
-  .lead .meta{font-size:13px;margin-top:10px;font-weight:600}
-  .lead .meta b{font-weight:800}
-  .lead .said{font-size:12.5px;color:var(--ink-soft);margin-top:6px;font-style:italic;
-    font-weight:500;line-height:1.5}
-  .lead .next{font-size:12.5px;margin-top:9px;font-weight:800;color:#5b4fb0}
-  .lead .stagebar{font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-top:8px;
-    letter-spacing:.03em}
+  .pblock{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .pblock h4{margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);font-weight:800}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:14px;border-bottom:1px solid var(--line)}
+  .kv:last-of-type{border-bottom:none}
+  .kv .k{color:var(--ink-soft);font-weight:500;flex:none}
+  .kv .v{font-weight:700;text-align:right;word-break:break-word}
 
-  /* contact buttons */
-  .contactrow{display:flex;gap:7px;margin-top:12px}
-  .cbtn{flex:1;text-align:center;text-decoration:none;border:none;border-radius:13px;
-    padding:11px 6px;font-size:12px;font-weight:800;cursor:pointer;display:flex;
-    align-items:center;justify-content:center;gap:5px;color:#231f36}
-  .cbtn.text{background:linear-gradient(140deg,#c8efdd,#a5e3c8)}
-  .cbtn.email{background:linear-gradient(140deg,#d3c9f6,#b9a9f0)}
-  .cbtn.insta{background:linear-gradient(140deg,#f7d9c9,#f3c0a8)}
-  .cbtn.off{background:#fff;color:#b3aec2;border:1px solid rgba(120,110,160,.15)}
+  /* chase block */
+  .chasebox{display:flex;flex-direction:column;gap:12px}
+  .chaseline{font-size:13.5px;font-weight:600;color:var(--ink-soft)}
+  .chaseline b{font-weight:800;color:var(--amber-deep)}
+  .msgpreview{font-size:12.5px;line-height:1.6;color:var(--ink-soft);background:var(--bg);
+    border:1px solid var(--line);border-radius:11px;padding:13px 14px;white-space:pre-wrap}
+  .rowbtns{display:flex;gap:8px}
+  .rowbtns button{flex:1;border:none;border-radius:11px;padding:12px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .b-primary{background:var(--ink);color:#fff}
+  .b-ghost{background:var(--surface);border:1px solid var(--line-strong)!important;color:var(--ink)}
+  .b-soft{background:var(--amber-soft);color:var(--amber-deep);border:1px solid var(--amber-line)!important}
 
-  /* response buttons — all same white background, text colour differs */
-  .resprow{display:flex;gap:7px;margin-top:8px}
-  .rbtn{flex:1;border:1px solid rgba(120,110,160,.18);background:#fff;
-    border-radius:13px;padding:10px;font-size:12px;font-weight:800;cursor:pointer}
-  .rbtn.r-replied{color:#1d6647}
-  .rbtn.r-replied.active{border-color:#1d6647;box-shadow:inset 0 0 0 1px #1d6647}
-  .rbtn.r-noresp{color:#5b4fb0}
-  .rbtn.r-stop{color:#b13c3c}
+  /* notes */
+  .note{padding:12px 0;border-bottom:1px solid var(--line)}
+  .note:last-child{border-bottom:none}
+  .note .nt{font-size:10.5px;color:var(--ink-faint);font-weight:700;margin-bottom:4px;display:flex;align-items:center}
+  .note .nb{font-size:13.5px;line-height:1.5;font-weight:500}
+  .note .ntag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--amber-deep);background:var(--amber-soft);padding:1px 6px;border-radius:5px;margin-left:7px}
+  .addnote{display:flex;gap:8px;margin-bottom:6px}
+  .addnote textarea{flex:1;border:1px solid var(--line-strong);border-radius:11px;padding:11px 13px;
+    font-size:14px;background:var(--surface);font-family:inherit;font-weight:500;resize:none;min-height:44px}
+  .addnote textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+  .addnote button{flex:none;align-self:stretch;border:none;border-radius:11px;padding:0 18px;
+    background:var(--ink);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+  .showmore{width:100%;background:none;border:none;color:var(--amber-deep);font-size:12px;font-weight:700;
+    cursor:pointer;padding:12px 10px 2px}
 
-  .rbadge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
-    background:#c8efdd;color:#1d6647;padding:2px 7px;border-radius:8px;margin-left:8px;
-    vertical-align:middle}
-
-  .editbtn{width:100%;margin-top:8px;background:none;border:none;color:var(--ink-soft);
-    font-size:11.5px;font-weight:700;cursor:pointer;padding:6px;text-decoration:underline;
-    text-underline-offset:2px}
-
-  .progwrap{height:12px;background:rgba(120,110,160,.14);border-radius:8px;margin-top:10px;overflow:hidden}
-  .progbar{height:100%;width:0%;border-radius:8px;
-    background:linear-gradient(90deg,#a7c4f6,#7a63d6);transition:width .4s ease}
-  .miniβtn{flex:1;border:1px solid rgba(120,110,160,.2);background:rgba(255,255,255,.6);
-    border-radius:12px;padding:10px 6px;font-size:11.5px;font-weight:800;color:var(--ink-soft);
-    cursor:pointer}
-  .obadge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    padding:2px 7px;border-radius:8px;margin-left:8px;vertical-align:middle}
-  .obadge.comment{background:#e5ddf7;color:#5b4fb0}
-  .obadge.dm{background:#e3eef7;color:#3f6ea5}
-  .obadge.done{background:#c8efdd;color:#1d6647}
-
-  .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:34px 14px;
-    line-height:1.7;font-weight:500}
-  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
-    background:var(--charcoal);color:#fff;padding:13px 22px;border-radius:30px;font-size:13.5px;
-    font-weight:700;opacity:0;transition:all .28s ease;z-index:60;pointer-events:none;
-    box-shadow:0 10px 30px rgba(30,25,50,.4)}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  .banner{border-radius:var(--r-md);padding:14px 16px;font-size:13px;font-weight:700;display:none;
-    align-items:center;gap:10px;margin-bottom:12px;
-    background:linear-gradient(140deg,#f7e3c4,#f3d3a8);color:#8a5e12;box-shadow:var(--shadow-soft)}
-  .banner.show{display:flex}
-  .banner .bic{width:26px;height:26px;flex:none;border-radius:9px;background:rgba(255,255,255,.5);
-    display:flex;align-items:center;justify-content:center}
-
-  /* modal */
+  /* modals */
   .modal{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;
-    background:rgba(35,30,60,.45);backdrop-filter:blur(6px)}
+    background:rgba(20,20,20,.4)}
   .modal.on{display:flex}
-  .sheet{width:100%;background:#f4f2fa;border-radius:28px 28px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom,0px) + 22px);
-    max-height:88vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(40,32,70,.3)}
-  .sheet h3{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.02em}
-  .sheet .sub{font-size:12.5px;color:var(--ink-soft);font-weight:500;margin-bottom:16px}
-  .sheet .close{position:absolute;right:22px;margin-top:-4px;background:none;border:none;
-    font-size:22px;color:var(--ink-soft);cursor:pointer}
-  .tpl{margin-bottom:14px}
-  .tpl label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;
-    color:var(--ink-soft);font-weight:700;margin-bottom:6px}
-  .tpl textarea{width:100%;border:1px solid rgba(120,110,160,.16);border-radius:var(--r-sm);
-    padding:12px 14px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit;
-    font-weight:500;resize:vertical;min-height:80px}
-  .tokens{font-size:11px;color:var(--ink-soft);margin-top:5px;font-weight:600}
-  .btnfull{width:100%;border:none;border-radius:var(--r-md);padding:15px;font-size:15px;
-    font-weight:800;cursor:pointer;background:linear-gradient(140deg,#2c2842,#221f33);color:#fff;
-    margin-top:6px}
-  .btnghost{width:100%;border:1px solid rgba(120,110,160,.2);border-radius:var(--r-md);padding:14px;
-    font-size:14px;font-weight:800;cursor:pointer;background:rgba(255,255,255,.7);
-    color:var(--ink);margin-top:9px}
-  .syncnote{font-size:11.5px;color:var(--ink-soft);line-height:1.6;font-weight:500;
-    background:rgba(255,255,255,.6);border-radius:14px;padding:12px 14px;margin-top:4px}
+  .sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;
+    padding:22px 18px calc(env(safe-area-inset-bottom,0px) + 22px);max-height:92vh;overflow-y:auto;
+    box-shadow:0 -8px 40px rgba(0,0,0,.18)}
+  .sheet h3{margin:0 0 4px;font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .sheet .sub{font-size:12.5px;color:var(--ink-soft);font-weight:500;margin-bottom:18px}
+  .sheet .close{position:absolute;right:22px;margin-top:-2px;background:none;border:none;font-size:24px;color:var(--ink-faint);cursor:pointer;line-height:1}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:6px}
+  .field input,.field textarea{width:100%;border:1px solid var(--line-strong);border-radius:11px;
+    padding:12px 14px;font-size:15px;background:var(--surface);color:var(--ink);font-family:inherit;font-weight:500}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+  .field textarea{resize:none;min-height:50px}
+  .field.two{display:flex;gap:10px}.field.two>div{flex:1}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:9px 13px;
+    font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer}
+  .chip.on{background:var(--amber);color:#fff;border-color:transparent}
+  .btnfull{width:100%;border:none;border-radius:13px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;
+    background:var(--ink);color:#fff;margin-top:8px}
+  .btnghost{width:100%;border:1px solid var(--line-strong);border-radius:12px;padding:14px;font-size:14px;
+    font-weight:700;cursor:pointer;background:var(--surface);color:var(--ink);margin-top:12px}
+  .micbtn{width:100%;border:1px solid var(--amber-line);background:var(--amber-soft);
+    color:var(--amber-deep);border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:16px;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .micbtn.recording{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+  .transcript{font-size:13px;line-height:1.5;background:var(--bg);border:1px solid var(--line);
+    border-radius:11px;padding:12px 14px;margin-bottom:14px;display:none}
+  .transcript.show{display:block}
+
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:13px 22px;border-radius:12px;font-size:13.5px;font-weight:600;
+    opacity:0;transition:all .26s ease;z-index:90;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="brand">
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-    <div><h1>TapMate <span>Log</span></h1><div class="sub">Tap. Talk. Follow up. <b style="color:#7a63d6">· f</b></div></div>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="4" stroke="#231f36" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#231f36"/><path d="M12 7v1M12 16v1" stroke="#231f36" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div><h1>TapMate <span>CRM</span></h1><div class="sub">Pitch. Log. Chase. <b style="color:#7a63d6">· h</b></div></div>
   </div>
-  <div class="pill" id="count">0</div>
+  <button class="addbtn" id="addBtn">+ New</button>
 </div>
 
-<div class="tabs">
-  <div class="tab on" data-view="today">Today <span class="badge" id="bToday">0</span></div>
-  <div class="tab" data-view="capture">Log</div>
-  <div class="tab" data-view="all">All <span class="badge" id="bAll">0</span></div>
-  <div class="tab" data-view="outreach">Outreach <span class="badge" id="bOut">0</span></div>
+<!-- DASHBOARD -->
+<div class="view on" id="v-dash">
+  <div class="statgrid">
+    <div class="stat due"><div class="n" id="sDue">0</div><div class="k">Ready to chase</div></div>
+    <div class="stat interested"><div class="n" id="sInterested">0</div><div class="k">Interested</div></div>
+    <div class="stat chasing"><div class="n" id="sChasing">0</div><div class="k">In sequence</div></div>
+    <div class="stat won"><div class="n" id="sWon">0</div><div class="k">Won</div></div>
+  </div>
+
+  <div class="sec"><h3>Ready to chase</h3><a id="toChase">See all →</a></div>
+  <div id="dashChase"></div>
+
+  <div class="sec"><h3>Recently active</h3><a id="toAll">All prospects →</a></div>
+  <div id="dashRecent"></div>
 </div>
 
-<!-- TODAY -->
-<div class="view on" id="v-today">
-  <div class="banner" id="reminderBanner"><div class="bic">⏰</div><span id="reminderText"></span></div>
-  <div class="bento" style="margin-bottom:4px">
-    <div class="cell half card clay stat">
-      <div class="ic lav"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6" stroke="#3a2f66" stroke-width="2" stroke-linecap="round"/></svg></div>
-      <div class="big" id="statDue">0</div><div class="k">To contact today</div>
-    </div>
-    <div class="cell half card dark stat">
-      <div class="ic" style="background:rgba(255,255,255,.14)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="2"/><path d="M12 8v4l3 2" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
-      <div class="big" id="statOpen">0</div><div class="k">Open leads</div>
-    </div>
-  </div>
-  <div class="sec"><h3>Contact these</h3>
-    <button class="exp" id="tplBtn">Messages</button></div>
-  <div id="todayList"></div>
-</div>
-
-<!-- CAPTURE -->
-<div class="view" id="v-capture">
-  <div class="card">
-    <div class="eyebrow">Log a lead</div>
-    <h2 class="title" style="margin-top:6px">New lead</h2>
-    <p class="hint">Fill in what you've got — you can add the rest later by tapping Edit on the lead. Or use voice to fill it in fast.</p>
-    <button class="micbtn secondary" id="micbtn"><span class="dot"></span><span id="micLabel">🎤 Fill by voice instead</span></button>
-    <div class="transcript" id="transcript"><div class="lbl">What I heard</div><div id="transcriptText"></div></div>
-    <div class="fields show" id="fields">
-      <div class="field"><label>Business name</label><input id="f_biz" placeholder="Blades Barbers"></div>
-      <div class="field two">
-        <div><label>Town</label><input id="f_town" placeholder="Feltham"></div>
-        <div><label>Contact number</label><input id="f_phone" inputmode="tel" placeholder="07…"></div>
-      </div>
-      <div class="field two">
-        <div><label>Spoke to</label><input id="f_spoke" placeholder="Sarah"></div>
-        <div><label>Owner / DM</label><input id="f_owner" placeholder="Sarah (owner)"></div>
-      </div>
-      <div class="field two">
-        <div><label>Email</label><input id="f_email" inputmode="email" placeholder="optional"></div>
-        <div><label>Instagram handle</label><input id="f_insta" placeholder="@bladesbarbers"></div>
-      </div>
-      <div class="field"><label>Product they're interested in</label>
-        <div class="chips" id="prodChips">
-          <div class="chip" data-prod="Multi-Link">Multi-Link</div>
-          <div class="chip" data-prod="White Google">White Google</div>
-          <div class="chip" data-prod="Black Google">Black Google</div>
-          <div class="chip" data-prod="Blue Google">Blue Google</div>
-        </div>
-      </div>
-      <div class="field"><label>What they said / objection</label><textarea id="f_said" placeholder="Interested, wants to think about it"></textarea></div>
-      <div class="field"><label>Next action</label><input id="f_next" placeholder="Message on Instagram"></div>
-      <div class="field"><label>Channel</label>
-        <div class="chips" id="chanChips">
-          <div class="chip" data-ch="Text">Text</div>
-          <div class="chip" data-ch="Email">Email</div>
-          <div class="chip" data-ch="Instagram">Instagram</div>
-          <div class="chip" data-ch="Call">Call</div>
-          <div class="chip" data-ch="Visit">Visit</div>
-        </div>
-      </div>
-      <div class="field"><label>Pitch day / start sequence (usually today)</label>
-        <div class="chips" id="whenChips">
-          <div class="chip today" data-days="0">Today</div>
-          <div class="chip" data-days="1">Tomorrow</div>
-          <div class="chip" data-days="2">2 days</div>
-          <div class="chip" data-days="3">3 days</div>
-          <div class="chip" data-days="7">Next week</div>
-          <div class="chip" data-days="14">2 weeks</div>
-        </div>
-        <input id="f_when" type="date" style="margin-top:9px">
-      </div>
-      <div class="actionrow">
-        <button class="clear" id="clearBtn">Clear</button>
-        <button class="save" id="saveBtn">Save lead</button>
-      </div>
-    </div>
-  </div>
+<!-- CHASE -->
+<div class="view" id="v-chase">
+  <div class="sec"><h3>Ready to chase</h3></div>
+  <div style="font-size:12px;color:var(--ink-soft);font-weight:600;margin:-4px 4px 12px">
+    Chase when you can — nothing piles up as overdue. Ordered by who's been waiting longest.</div>
+  <div id="chaseList"></div>
 </div>
 
 <!-- ALL -->
 <div class="view" id="v-all">
-  <div class="sec"><h3>All leads</h3>
-    <button class="exp" id="exportBtn">Export CSV</button></div>
+  <input class="searchbar" id="search" placeholder="Search business, owner, town…">
+  <div class="filterrow" id="filterRow">
+    <div class="fchip on" data-f="all">All</div>
+    <div class="fchip" data-f="new">New</div>
+    <div class="fchip" data-f="interested">Interested</div>
+    <div class="fchip" data-f="chasing">Chasing</div>
+    <div class="fchip" data-f="won">Won</div>
+    <div class="fchip" data-f="dead">Dead</div>
+  </div>
+  <div class="sortrow">Sort:
+    <select id="sortSel">
+      <option value="recent">Most recent</option>
+      <option value="due">Due to chase</option>
+      <option value="name">Name A–Z</option>
+      <option value="created">Newest added</option>
+    </select>
+    <span id="allCount" style="margin-left:auto"></span>
+  </div>
   <div id="allList"></div>
-  <button class="btnghost" id="syncBtn">Back up to Google Sheets</button>
-  <div class="syncnote" id="syncNote">Not connected. Tap “Back up to Google Sheets” to set it up, or use Export CSV any time.</div>
 </div>
 
-<!-- OUTREACH -->
-<div class="view" id="v-outreach">
-  <!-- progress -->
-  <div class="card clay" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:baseline">
-      <div class="eyebrow">Today's outreach</div>
-      <div style="font-size:12px;font-weight:800;color:var(--ink-soft)" id="outProgTxt">0 / 20</div>
+<!-- PROFILE -->
+<div class="view" id="v-profile"></div>
+
+<!-- bottom nav -->
+<div class="nav">
+  <button class="navbtn on" data-view="dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</button>
+  <button class="navbtn" data-view="chase"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="navChaseBadge"></span>Chase</button>
+  <button class="navbtn" data-view="all"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Prospects</button>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal" id="formModal">
+  <div class="sheet">
+    <button class="close" id="formClose">×</button>
+    <h3 id="formTitle">New prospect</h3>
+    <div class="sub">Fill in what you've got. You can add the rest later from their profile.</div>
+    <button class="micbtn" id="micbtn"><span id="micLabel">🎤 Fill by voice</span></button>
+    <div class="transcript" id="transcript"><div id="transcriptText"></div></div>
+    <div class="field"><label>Business name</label><input id="f_biz" placeholder="Blades Barbers"></div>
+    <div class="field two">
+      <div><label>Town</label><input id="f_town" placeholder="Feltham"></div>
+      <div><label>Category</label><input id="f_cat" placeholder="Barber"></div>
     </div>
-    <div class="progwrap"><div class="progbar" id="outProgBar"></div></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="miniβtn" id="outSettingsBtn">⚙ Daily target</button>
-      <button class="miniβtn" id="outImportBtn">⬆ Import CSV</button>
-      <button class="miniβtn" id="outStatsBtn">📊 A/B stats</button>
+    <div class="field two">
+      <div><label>Owner / decision-maker</label><input id="f_owner" placeholder="Sarah"></div>
+      <div><label>Phone</label><input id="f_phone" inputmode="tel" placeholder="07…"></div>
     </div>
-  </div>
-
-  <div id="outChaseSec" style="display:none">
-    <div class="sec"><h3>⏰ Chase these</h3></div>
-    <div id="outChaseList"></div>
-  </div>
-  <div id="outReplySec" style="display:none">
-    <div class="sec"><h3>💬 Replied — your move</h3></div>
-    <div id="outReplyList"></div>
-  </div>
-  <div class="sec"><h3>Message them</h3>
-    <button class="exp" id="outMsgBtn">Openers</button></div>
-  <div style="font-size:11.5px;font-weight:700;color:var(--ink-soft);margin:-4px 6px 10px" id="outBatchHead">0 left to contact</div>
-  <div id="outList"></div>
-</div>
-
-<!-- OUTREACH IMPORT MODAL -->
-<div class="modal" id="outImportModal">
-  <div class="sheet">
-    <button class="close" id="outImportClose">×</button>
-    <h3>Import prospects</h3>
-    <div class="sub">Pick your CSV. Columns expected: Business Name, Address, Category, Rating, Instagram, Phone, Email, Website. Rows with no Instagram, phone or email are skipped. Re-importing skips duplicates (matched on business + Instagram).</div>
-    <input type="file" id="outFile" accept=".csv,text/csv" style="width:100%;padding:14px;border:1px dashed rgba(120,110,160,.35);border-radius:15px;background:#fff;font-family:inherit;font-size:14px;margin-bottom:10px">
-    <div class="syncnote" id="outImportResult" style="display:none"></div>
-    <button class="btnghost" id="outClearAll" style="color:#b13c3c;margin-top:14px">Clear all outreach prospects</button>
-  </div>
-</div>
-
-<!-- OUTREACH SETTINGS MODAL -->
-<div class="modal" id="outSettingsModal">
-  <div class="sheet">
-    <button class="close" id="outSettingsClose">×</button>
-    <h3>Daily target</h3>
-    <div class="sub">How many prospects to work each day. Start conservative (20) on a healthy account and raise it gradually as things stay stable — sudden jumps in cold DMs are what triggers Instagram limits.</div>
-    <div class="tpl"><label>Prospects per day</label>
-      <input id="outTarget" type="number" min="5" max="100" style="width:100%;border:1px solid rgba(120,110,160,.16);border-radius:15px;padding:12px 14px;font-size:16px;background:#fff;font-family:inherit;font-weight:600"></div>
-    <button class="btnfull" id="outTargetSave">Save</button>
-  </div>
-</div>
-
-<!-- OUTREACH STATS MODAL -->
-<div class="modal" id="outStatsModal">
-  <div class="sheet">
-    <button class="close" id="outStatsClose">×</button>
-    <h3>Comment A/B test</h3>
-    <div class="sub">Half your prospects are randomly flagged to comment on their post first; half are DM-only. This compares reply rates so you can see whether commenting is worth the effort. Give it 100+ in each group before trusting it.</div>
-    <div id="outStatsBody"></div>
-  </div>
-</div>
-
-<!-- OUTREACH OPENERS MODAL -->
-<div class="modal" id="outMsgModal">
-  <div class="sheet">
-    <button class="close" id="outMsgClose">×</button>
-    <h3>Your openers</h3>
-    <div class="sub">The app rotates through these Instagram openers so your outbound doesn't look templated. Text & email get their own versions (below) with links, since cold text/email recipients don't know who you are.</div>
-    <div class="tpl"><label>Instagram opener 1</label><textarea id="o_0" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Instagram opener 2</label><textarea id="o_1" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Instagram opener 3</label><textarea id="o_2" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Text / SMS opener (includes links)</label><textarea id="o_text" style="min-height:120px"></textarea></div>
-    <div class="tpl"><label>Email subject</label><textarea id="o_emailsub" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Email opener (includes links)</label><textarea id="o_email" style="min-height:150px"></textarea></div>
-    <div class="tpl"><label>The 3 questions (sent after they reply)</label><textarea id="o_q" style="min-height:120px"></textarea></div>
-    <div class="sub" style="margin:6px 0 12px">Follow-up chases (if they don't reply):</div>
-    <div class="tpl"><label>Chase 1 — 1 day after first message</label><textarea id="o_ch0" style="min-height:90px"></textarea></div>
-    <div class="tpl"><label>Chase 2 — 3 days after chase 1</label><textarea id="o_ch1" style="min-height:90px"></textarea></div>
-    <div class="tpl"><label>Breakup — 7 days after chase 2</label><textarea id="o_ch2" style="min-height:90px"></textarea></div>
-    <button class="btnfull" id="outMsgSave">Save messages</button>
-  </div>
-</div>
-
-<!-- TEMPLATE MODAL -->
-<div class="modal" id="tplModal">
-  <div class="sheet">
-    <button class="close" id="tplClose">×</button>
-    <h3>Your sales sequence</h3>
-    <div class="sub">Your 4 chase messages. Each fills in automatically for whichever chase a lead is on — same message by Text, Email or Instagram. The {link} token is set automatically from the product you picked on each lead. Tokens: {name} {business} {town} {link}</div>
-    <div class="tpl"><label>Email subject line</label>
-      <textarea id="t_emailsub" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Chase 1 — Day 0 (same evening)</label><textarea id="t_c0" style="min-height:150px"></textarea></div>
-    <div class="tpl"><label>Chase 2 — Day 1</label><textarea id="t_c1" style="min-height:130px"></textarea></div>
-    <div class="tpl"><label>Chase 3 — Day 5 (the offer)</label><textarea id="t_c2" style="min-height:130px"></textarea></div>
-    <div class="tpl"><label>Chase 4 — Day 10 (last one)</label><textarea id="t_c3" style="min-height:110px"></textarea></div>
-    <button class="btnfull" id="tplSave">Save sequence</button>
-  </div>
-</div>
-
-<!-- SHEETS MODAL -->
-<div class="modal" id="syncModal">
-  <div class="sheet">
-    <button class="close" id="syncClose">×</button>
-    <h3>Google Sheets backup</h3>
-    <div class="sub">Paste the web-app URL from your Google Apps Script here. Every save then also writes a row to your sheet.</div>
-    <div class="tpl"><label>Apps Script URL</label>
-      <textarea id="sheetUrl" style="min-height:60px" placeholder="https://script.google.com/macros/s/..."></textarea></div>
-    <button class="btnfull" id="syncSave">Save & test</button>
-    <button class="btnghost" id="syncAll">Push all leads now</button>
-    <div class="syncnote">Setup steps are in the notes I sent with this app. Your data always stays on the phone too — Sheets is a backup, not a dependency.</div>
-  </div>
-</div>
-
-<!-- EDIT MODAL -->
-<div class="modal" id="editModal">
-  <div class="sheet">
-    <button class="close" id="editClose">×</button>
-    <h3>Edit lead</h3>
-    <div class="sub" id="editSub">Update anything — add an Instagram handle, owner name, objection, or change the product.</div>
-    <div class="tpl"><label>Business name</label><textarea id="e_biz" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Town</label><textarea id="e_town" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Contact number</label><textarea id="e_phone" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Spoke to</label><textarea id="e_spoke" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Owner / decision-maker</label><textarea id="e_owner" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Email</label><textarea id="e_email" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Instagram handle</label><textarea id="e_insta" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Product</label>
-      <div class="chips" id="e_prodChips">
+    <div class="field two">
+      <div><label>Email</label><input id="f_email" inputmode="email" placeholder="optional"></div>
+      <div><label>Instagram</label><input id="f_insta" placeholder="@handle"></div>
+    </div>
+    <div class="field"><label>Product they're interested in</label>
+      <div class="chips" id="prodChips">
         <div class="chip" data-prod="Multi-Link">Multi-Link</div>
         <div class="chip" data-prod="White Google">White Google</div>
         <div class="chip" data-prod="Black Google">Black Google</div>
         <div class="chip" data-prod="Blue Google">Blue Google</div>
-      </div></div>
-    <div class="tpl"><label>What they said / objection</label><textarea id="e_said" style="min-height:70px"></textarea></div>
-    <div class="tpl"><label>Next action</label><textarea id="e_next" style="min-height:44px"></textarea></div>
-    <div class="tpl"><label>Pitch date (start of sequence)</label>
-      <input id="e_pitch" type="date" style="width:100%;border:1px solid rgba(120,110,160,.16);border-radius:15px;padding:12px 14px;font-size:15px;background:#fff;font-family:inherit;font-weight:500"></div>
-    <button class="btnfull" id="editSave">Save changes</button>
-    <button class="btnghost" id="editReopen" style="display:none">Reopen (put back in sequence)</button>
+      </div>
+    </div>
+    <div class="field"><label>Status</label>
+      <div class="chips" id="statusChips">
+        <div class="chip" data-st="new">New</div>
+        <div class="chip" data-st="interested">Interested</div>
+        <div class="chip" data-st="chasing">Chasing</div>
+        <div class="chip" data-st="won">Won</div>
+        <div class="chip" data-st="dead">Dead</div>
+      </div>
+    </div>
+    <div class="field"><label>First note (what they said / objection)</label>
+      <textarea id="f_note" placeholder="Interested but wants to think about it"></textarea></div>
+    <button class="btnfull" id="formSave">Save prospect</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ================= STORE ================= */
+/* ============ STORE ============ */
 const store={
   key:'tapmate_leads_v1',
   all(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
@@ -507,756 +348,391 @@ const cfg={
   set(o){localStorage.setItem(this.key,JSON.stringify(o))}
 };
 const $=id=>document.getElementById(id);
-let selectedChan='',selectedDays=null;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900)}
+function isoOf(d){return d.toISOString().slice(0,10)}
+function addDays(d,n){const x=new Date(d.getTime());x.setDate(x.getDate()+n);return x}
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
-/* ===== PRODUCTS ===== */
+/* ============ PRODUCTS + FUNNEL ============ */
 const PRODUCTS={
   'Multi-Link':'https://www.tapmate.net/product/all-in-one-multi-link-plate---nfc-qr',
   'White Google':'https://www.tapmate.net/product/white-google-review-nfc-plate',
   'Black Google':'https://www.tapmate.net/product/black-google-review-nfc-plate',
   'Blue Google':'https://www.tapmate.net/product/google-review-plate---nfc-qr-code'
 };
-const PRODUCT_NAMES=Object.keys(PRODUCTS);
-
-/* ===== SALES FUNNEL =====
-   4 chase stages keyed to calendar-day offsets from the pitch date.
-   The due date is ALWAYS pitchDate + offset, regardless of when you act. */
 const FUNNEL=[
-  {name:'Chase 1', label:'0 Day', offset:0,
+  {name:'Chase 1',label:'Day 0',offset:0,
    msg:"Hi {name}, it's Jamie from TapMate. Great meeting you today!\n\nHere's the link to the Multi-Link Plate we looked at:\n{link}\n\nIt lets customers instantly give you Google Reviews, follow you on socials, go to your website, contact info, or pretty much anything else you can think of with a single tap.\n\nIf you have any questions at all, let me know!"},
-  {name:'Chase 2', label:'1 Day', offset:1,
+  {name:'Chase 2',label:'Day 1',offset:1,
    msg:"Hi - just checking you got the link I sent over yesterday.\n\nI forgot to mention - we also do stands or cards if you think they would work better!\n\nIf you're not interested that's totally fine, it really helps to know what I could be doing better / differently.\n\nHave a great rest of your day!"},
-  {name:'Chase 3', label:'5 Day', offset:5,
+  {name:'Chase 3',label:'Day 5',offset:5,
    msg:"Hi,\n\nWe can do 40% off if we get things sorted by this Saturday. This would make the multi-link plate £24 down from £55.50.\n\nLet me know if that works, and we can get things sorted.\n\nUse SATURDAY40 on the website or we can send a payment link.\n\nThanks!"},
-  {name:'Chase 4', label:'10 Day', offset:10,
+  {name:'Chase 4',label:'Day 10',offset:10,
    msg:"Sorry to bother, I'll not send any other messages after this one.\n\nIf I did something wrong / could have done something better, please let me know as it would really help.\n\nAll the best, and let us know if we can do anything for you in the future!"}
 ];
-function funnel(){ const c=cfg.get(); return (c.funnel&&c.funnel.length===4)?c.funnel:FUNNEL; }
-/* link for a lead = its selected product's link, else the saved default */
-function linkForLead(l){
-  if(l&&l.product&&PRODUCTS[l.product])return PRODUCTS[l.product];
-  return cfg.get().link || PRODUCTS['Multi-Link'];
+function funnel(){const c=cfg.get();return(c.funnel&&c.funnel.length===4)?c.funnel:FUNNEL}
+function linkFor(l){return(l.product&&PRODUCTS[l.product])?PRODUCTS[l.product]:PRODUCTS['Multi-Link']}
+function fillMsg(str,l){
+  const name=(l.owner||'there').replace(/\s*\(owner\)\s*/i,'').trim()||'there';
+  return str.replace(/{name}/g,name).replace(/{business}/g,l.biz||'your shop').replace(/{link}/g,linkFor(l));
 }
-function emailSubject(){ return cfg.get().emailsub || "TapMate — the Multi-Link Plate for {business}"; }
+function chaseMsg(l){const F=funnel();const st=Math.min(l.cstage||0,F.length-1);return fillMsg(F[st].msg,l)}
 
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');
-  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900)}
-
-/* ================= CHASE LADDER ================= */
-function addBusinessDays(date,n){
-  const d=new Date(date.getTime());let a=0;
-  while(a<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w!==0&&w!==6)a++}
-  return d;
+/* ============ MIGRATION ============
+   Bring older records up to the CRM shape (notes array, status). */
+function migrate(){
+  const a=store.all();let changed=false;
+  a.forEach(l=>{
+    if(!l.notes){
+      l.notes=[];
+      if(l.said){l.notes.push({t:l.created||new Date().toISOString(),body:l.said,tag:'objection'});}
+      changed=true;
+    }
+    if(!l.status){
+      // infer from old flags
+      if(l.dead)l.status='dead';
+      else if(l.replied)l.status='interested';
+      else if((l.stage||0)>0)l.status='chasing';
+      else l.status='new';
+      changed=true;
+    }
+    if(l.cstage==null){l.cstage=l.stage||0;changed=true;}
+    if(!l.lastContact&&l.created){l.lastContact=l.created;changed=true;}
+  });
+  if(changed)store.save(a);
 }
-function addDays(date,n){const d=new Date(date.getTime());d.setDate(d.getDate()+n);return d;}
-function isoOf(d){return d.toISOString().slice(0,10)}
 
-/* Advance to the next chase. Due date is ALWAYS pitchDate + that
-   stage's offset — never "today" — so the schedule stays fixed. */
-function advanceNoResponse(lead){
-  const st=lead.stage||0;
-  lead.lastContact=new Date().toISOString();
+/* ============ CHASE HELPERS ============ */
+function nextChaseName(l){const F=funnel();const st=Math.min((l.cstage||0),F.length-1);return F[st].name+' · '+F[st].label}
+function daysSince(iso){if(!iso)return null;const d=new Date(iso);const t=new Date();return Math.floor((t-d)/86400000)}
+function isReadyToChase(l){
+  if(l.status!=='chasing')return false;
   const F=funnel();
-  if(st>=F.length-1){ lead.dead=true; lead.when=''; return 'dead'; }
-  const next=st+1;
-  const pitch=lead.pitchDate?new Date(lead.pitchDate+'T00:00:00'):new Date(lead.created);
-  const due=addDays(pitch, F[next].offset);
-  lead.stage=next; lead.when=isoOf(due);
-  return F[next].name;
+  if((l.cstage||0)>=F.length)return false; // sequence finished
+  // ready if the gap since last contact >= the offset step to the current stage
+  return true; // in the CRM model, anything 'chasing' with stages left is chaseable when you choose
 }
-function stageLabel(l){
-  if(l.dead)return 'Sequence finished';
-  const F=funnel();const st=l.stage||0;const cur=F[st];
-  return cur.name+' - '+cur.label;
+function statusLabel(s){return{new:'New',interested:'Interested',chasing:'Chasing',won:'Won',dead:'Dead'}[s]||s}
+
+/* ============ ROUTER ============ */
+let currentProfileId=null;
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  $('v-'+v).classList.add('on');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  if(v==='dash')renderDash();
+  if(v==='chase')renderChase();
+  if(v==='all')renderAll();
+  window.scrollTo(0,0);
 }
-function daysSinceFirst(l){
-  const start=l.pitchDate?new Date(l.pitchDate+'T00:00:00'):new Date(l.created);
-  const t=new Date();t.setHours(0,0,0,0);start.setHours(0,0,0,0);
-  const d=Math.round((t-start)/86400000);
-  if(d<0)return '';
-  if(d===0)return 'first contact today';
-  return d+' day'+(d===1?'':'s')+' since first contact';
+document.querySelectorAll('.navbtn').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
+$('toChase').addEventListener('click',()=>go('chase'));
+$('toAll').addEventListener('click',()=>go('all'));
+
+/* ============ DASHBOARD ============ */
+function renderDash(){
+  const a=store.all();
+  const active=a.filter(l=>l.status!=='dead'&&l.status!=='won');
+  const chaseable=a.filter(isReadyToChase);
+  $('sDue').textContent=chaseable.length;
+  $('sInterested').textContent=a.filter(l=>l.status==='interested').length;
+  $('sChasing').textContent=a.filter(l=>l.status==='chasing').length;
+  $('sWon').textContent=a.filter(l=>l.status==='won').length;
+  const nb=$('navChaseBadge');
+  if(chaseable.length){nb.className='nbadge';nb.textContent=chaseable.length;}else nb.textContent='';
+
+  // ready to chase — longest waiting first
+  const chaseSorted=chaseable.slice().sort((x,y)=>(x.lastContact||'').localeCompare(y.lastContact||''));
+  $('dashChase').innerHTML=chaseSorted.length?chaseSorted.slice(0,3).map(prowHTML).join('')
+    :'<div class="empty">Nobody waiting on a chase. Nice.</div>';
+
+  // recently active
+  const recent=a.slice().sort((x,y)=>(y.lastContact||y.created||'').localeCompare(x.lastContact||x.created||''));
+  $('dashRecent').innerHTML=recent.length?recent.slice(0,4).map(prowHTML).join('')
+    :'<div class="empty">No prospects yet.<br>Tap “+ New” to add your first.</div>';
+  bindRows();
 }
 
-/* ================= SPEECH ================= */
+/* ============ CHASE VIEW ============ */
+function renderChase(){
+  const a=store.all();
+  const chaseable=a.filter(isReadyToChase).sort((x,y)=>(x.lastContact||'').localeCompare(y.lastContact||''));
+  $('chaseList').innerHTML=chaseable.length?chaseable.map(prowHTML).join('')
+    :'<div class="empty">Nobody to chase right now.<br>Prospects you mark as “Chasing” show up here.</div>';
+  bindRows();
+}
+
+/* ============ ALL VIEW ============ */
+let filterStatus='all',sortBy='recent';
+$('search').addEventListener('input',renderAll);
+$('sortSel').addEventListener('change',()=>{sortBy=$('sortSel').value;renderAll();});
+document.querySelectorAll('#filterRow .fchip').forEach(c=>c.addEventListener('click',()=>{
+  filterStatus=c.dataset.f;
+  document.querySelectorAll('#filterRow .fchip').forEach(x=>x.classList.toggle('on',x===c));
+  renderAll();
+}));
+function renderAll(){
+  let a=store.all();
+  const q=$('search').value.trim().toLowerCase();
+  if(q)a=a.filter(l=>(l.biz+' '+(l.owner||'')+' '+(l.town||'')+' '+(l.cat||'')).toLowerCase().includes(q));
+  if(filterStatus!=='all')a=a.filter(l=>l.status===filterStatus);
+  a.sort((x,y)=>{
+    if(sortBy==='name')return (x.biz||'').localeCompare(y.biz||'');
+    if(sortBy==='created')return (y.created||'').localeCompare(x.created||'');
+    if(sortBy==='due')return (x.lastContact||'').localeCompare(y.lastContact||'');
+    return (y.lastContact||y.created||'').localeCompare(x.lastContact||x.created||''); // recent
+  });
+  $('allCount').textContent=a.length+' shown';
+  $('allList').innerHTML=a.length?a.map(prowHTML).join(''):'<div class="empty">No prospects match.</div>';
+  bindRows();
+}
+
+/* ============ PROSPECT ROW ============ */
+function prowHTML(l){
+  const dc=daysSince(l.lastContact);
+  let sub=l.town||l.cat||'';
+  if(l.owner)sub=(l.owner)+(sub?' · '+sub:'');
+  let right='';
+  if(l.status==='chasing')right=`<div class="pdue ready">${nextChaseName(l)}</div>`;
+  else if(dc!=null)right=`<div class="pdue">${dc===0?'today':dc+'d ago'}</div>`;
+  return `<div class="prow" data-id="${l.id}">
+    <div class="pmain"><div class="pbiz">${esc(l.biz)}</div><div class="psub">${esc(sub)}</div></div>
+    <div class="pright"><span class="sbadge ${l.status}">${statusLabel(l.status)}</span>${right}</div>
+  </div>`;
+}
+function bindRows(){document.querySelectorAll('.prow').forEach(r=>r.addEventListener('click',()=>openProfile(r.dataset.id)))}
+
+/* ============ PROFILE ============ */
+function openProfile(id){
+  currentProfileId=id;
+  const l=store.all().find(x=>String(x.id)===String(id));if(!l)return;
+  renderProfile(l);
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  $('v-profile').classList.add('on');
+  window.scrollTo(0,0);
+}
+function renderProfile(l){
+  const igHandle=(l.insta||'').replace(/^@/,'');
+  const igUrl=l.insta?(l.insta.startsWith('http')?l.insta:'https://instagram.com/'+igHandle):'';
+  const phone=(l.phone||'').replace(/\s/g,'');
+  const dc=daysSince(l.lastContact);
+  const notes=(l.notes||[]).slice().reverse();
+  const showAll=l._showAllNotes;
+  const shown=showAll?notes:notes.slice(0,2);
+
+  const statusBtns=['new','interested','chasing','won','dead'].map(s=>
+    `<button class="statuspick ${s} ${l.status===s?'on':''}" onclick="setStatus('${l.id}','${s}')">${statusLabel(s)}</button>`).join('');
+
+  // chase block only when chasing
+  let chaseBlock='';
+  if(l.status==='chasing'){
+    const F=funnel();const st=Math.min(l.cstage||0,F.length-1);const isLast=(l.cstage||0)>=F.length-1;
+    chaseBlock=`<div class="pblock"><h4>Chase sequence</h4>
+      <div class="chasebox">
+        <div class="chaseline">On <b>${nextChaseName(l)}</b>${dc!=null?' · last contact '+(dc===0?'today':dc+'d ago'):''}</div>
+        <div class="msgpreview">${esc(chaseMsg(l))}</div>
+        <div class="rowbtns">
+          ${igUrl?`<button class="b-soft" onclick="chaseVia('${l.id}','insta')">Instagram</button>`:''}
+          ${phone?`<button class="b-soft" onclick="chaseVia('${l.id}','text')">Text</button>`:''}
+          ${l.email?`<button class="b-soft" onclick="chaseVia('${l.id}','email')">Email</button>`:''}
+        </div>
+        <div class="rowbtns">
+          <button class="b-primary" onclick="chaseSent('${l.id}')">${isLast?'Sent — finish sequence':'Mark sent → next chase'}</button>
+        </div>
+      </div></div>`;
+  }
+
+  $('v-profile').innerHTML=`
+    <button class="pback" onclick="backFromProfile()">← Back</button>
+    <div class="phead">
+      <div class="pbizname">${esc(l.biz)}</div>
+      <div class="pcat">${esc([l.owner,l.town,l.cat].filter(Boolean).join(' · '))}</div>
+      <div class="statusrow">${statusBtns}</div>
+      <div class="contactrow">
+        ${phone?`<a class="cbtn call" href="tel:${phone}">Call</a>`:`<span class="cbtn off">No number</span>`}
+        ${phone?`<a class="cbtn text" href="sms:${phone}">Text</a>`:`<span class="cbtn off">No text</span>`}
+        ${l.email?`<a class="cbtn email" href="mailto:${l.email}">Email</a>`:`<span class="cbtn off">No email</span>`}
+        ${igUrl?`<a class="cbtn insta" href="${igUrl}" target="_blank">Insta</a>`:`<span class="cbtn off">No Insta</span>`}
+      </div>
+    </div>
+
+    ${chaseBlock}
+
+    <div class="pblock"><h4>Notes & history</h4>
+      <div class="addnote">
+        <textarea id="newNote" placeholder="Add a note — what they said, an update…"></textarea>
+        <button onclick="addNote('${l.id}')">Add</button>
+      </div>
+      ${shown.length?shown.map(n=>`<div class="note">
+        <div class="nt">${new Date(n.t).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}${n.tag?`<span class="ntag">${n.tag}</span>`:''}</div>
+        <div class="nb">${esc(n.body)}</div></div>`).join(''):'<div class="note"><div class="nb" style="color:var(--ink-soft)">No notes yet.</div></div>'}
+      ${notes.length>2?`<button class="showmore" onclick="toggleNotes('${l.id}')">${showAll?'Show less':'Show all '+notes.length+' notes'}</button>`:''}
+    </div>
+
+    <div class="pblock"><h4>Details</h4>
+      <div class="kv"><span class="k">Phone</span><span class="v">${esc(l.phone||'—')}</span></div>
+      <div class="kv"><span class="k">Email</span><span class="v">${esc(l.email||'—')}</span></div>
+      <div class="kv"><span class="k">Instagram</span><span class="v">${esc(l.insta||'—')}</span></div>
+      <div class="kv"><span class="k">Product</span><span class="v">${esc(l.product||'—')}</span></div>
+      <div class="kv"><span class="k">Pitched</span><span class="v">${l.created?new Date(l.created).toLocaleDateString('en-GB'):'—'}</span></div>
+      <button class="btnghost" onclick="editProspect('${l.id}')">Edit details</button>
+    </div>`;
+}
+window.backFromProfile=function(){go('dash')};
+window.toggleNotes=function(id){const l=store.all().find(x=>String(x.id)===String(id));l._showAllNotes=!l._showAllNotes;renderProfile(l)};
+
+window.setStatus=function(id,s){
+  const a=store.all();const l=a.find(x=>String(x.id)===String(id));if(!l)return;
+  l.status=s;
+  if(s==='chasing'&&l.cstage==null)l.cstage=0;
+  store.save(a);renderProfile(l);toast('Status: '+statusLabel(s));
+};
+window.addNote=function(id){
+  const a=store.all();const l=a.find(x=>String(x.id)===String(id));if(!l)return;
+  const body=$('newNote').value.trim();if(!body){toast('Write a note first');return}
+  if(!l.notes)l.notes=[];
+  l.notes.push({t:new Date().toISOString(),body});
+  l.lastContact=new Date().toISOString();
+  store.save(a);renderProfile(l);toast('Note added ✓');
+};
+window.chaseVia=function(id,ch){
+  const l=store.all().find(x=>String(x.id)===String(id));if(!l)return;
+  const msg=chaseMsg(l);
+  if(ch==='insta'){
+    if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});
+    toast('Message copied — paste in the DM');
+    const h=(l.insta||'').replace(/^@/,'');
+    window.open(l.insta?(l.insta.startsWith('http')?l.insta:'https://instagram.com/'+h):'https://instagram.com','_blank');
+  } else if(ch==='text'){
+    const sep=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'&':'?';
+    window.open('sms:'+(l.phone||'').replace(/\s/g,'')+sep+'body='+encodeURIComponent(msg));
+  } else if(ch==='email'){
+    window.open('mailto:'+(l.email||'')+'?subject='+encodeURIComponent('TapMate — '+(l.biz||''))+'&body='+encodeURIComponent(msg));
+  }
+};
+window.chaseSent=function(id){
+  const a=store.all();const l=a.find(x=>String(x.id)===String(id));if(!l)return;
+  const F=funnel();
+  l.lastContact=new Date().toISOString();
+  if(!l.notes)l.notes=[];
+  l.notes.push({t:new Date().toISOString(),body:F[Math.min(l.cstage||0,F.length-1)].name+' sent',tag:'chase'});
+  if((l.cstage||0)>=F.length-1){ l.cstage=F.length; toast('Sequence finished'); }
+  else { l.cstage=(l.cstage||0)+1; toast('Logged — now on '+nextChaseName(l)); }
+  store.save(a);renderProfile(l);
+};
+
+/* ============ ADD / EDIT ============ */
+let editingId=null,pickProduct='',pickStatus='new';
+$('addBtn').addEventListener('click',()=>openForm(null));
+function openForm(id){
+  editingId=id;pickProduct='';pickStatus='new';
+  ['f_biz','f_town','f_cat','f_owner','f_phone','f_email','f_insta','f_note'].forEach(k=>$(k).value='');
+  document.querySelectorAll('#prodChips .chip,#statusChips .chip').forEach(c=>c.classList.remove('on'));
+  $('transcript').classList.remove('show');$('transcriptText').textContent='';
+  if(id){
+    const l=store.all().find(x=>String(x.id)===String(id));if(!l)return;
+    $('formTitle').textContent='Edit prospect';
+    $('f_biz').value=l.biz||'';$('f_town').value=l.town||'';$('f_cat').value=l.cat||'';
+    $('f_owner').value=l.owner||'';$('f_phone').value=l.phone||'';$('f_email').value=l.email||'';
+    $('f_insta').value=l.insta||'';
+    pickProduct=l.product||'';pickStatus=l.status||'new';
+    document.querySelectorAll('#prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===pickProduct));
+    document.querySelectorAll('#statusChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.st===pickStatus));
+    $('f_note').parentElement.style.display='none'; // no first-note when editing
+  } else {
+    $('formTitle').textContent='New prospect';
+    $('f_note').parentElement.style.display='';
+    pickStatus='new';
+    document.querySelectorAll('#statusChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.st==='new'));
+  }
+  $('formModal').classList.add('on');
+}
+window.editProspect=function(id){openForm(id)};
+$('formClose').addEventListener('click',()=>$('formModal').classList.remove('on'));
+document.querySelectorAll('#prodChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  pickProduct=c.dataset.prod;document.querySelectorAll('#prodChips .chip').forEach(x=>x.classList.toggle('on',x===c));}));
+document.querySelectorAll('#statusChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  pickStatus=c.dataset.st;document.querySelectorAll('#statusChips .chip').forEach(x=>x.classList.toggle('on',x===c));}));
+
+$('formSave').addEventListener('click',()=>{
+  const biz=$('f_biz').value.trim();if(!biz){toast('Add a business name');$('f_biz').focus();return}
+  const a=store.all();
+  if(editingId){
+    const l=a.find(x=>String(x.id)===String(editingId));if(!l)return;
+    l.biz=biz;l.town=$('f_town').value.trim();l.cat=$('f_cat').value.trim();
+    l.owner=$('f_owner').value.trim();l.phone=$('f_phone').value.trim();
+    l.email=$('f_email').value.trim();l.insta=$('f_insta').value.trim();
+    l.product=pickProduct||l.product;l.status=pickStatus;
+    if(l.status==='chasing'&&l.cstage==null)l.cstage=0;
+    store.save(a);$('formModal').classList.remove('on');
+    openProfile(editingId);toast('Saved ✓');
+  } else {
+    const now=new Date().toISOString();
+    const lead={id:Date.now()+''+Math.floor(Math.random()*1000),
+      biz,town:$('f_town').value.trim(),cat:$('f_cat').value.trim(),
+      owner:$('f_owner').value.trim(),phone:$('f_phone').value.trim(),
+      email:$('f_email').value.trim(),insta:$('f_insta').value.trim(),
+      product:pickProduct||'Multi-Link',status:pickStatus,cstage:0,
+      created:now,lastContact:now,notes:[]};
+    const note=$('f_note').value.trim();
+    if(note)lead.notes.push({t:now,body:note,tag:'objection'});
+    a.unshift(lead);store.save(a);
+    $('formModal').classList.remove('on');
+    go('dash');toast('Prospect added ✓');
+  }
+});
+
+/* ============ VOICE ============ */
+const BIZ_TYPES='barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
 let recog=null,recording=false,finalText='';
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang='en-GB';
-  recog.onresult=e=>{let i2='';
-    for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
-      if(r.isFinal)finalText+=r[0].transcript+' ';else i2+=r[0].transcript}
-    $('transcript').classList.add('show');
-    $('transcriptText').textContent=(finalText+i2).trim()};
+  recog.onresult=e=>{let i2='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)finalText+=r[0].transcript+' ';else i2+=r[0].transcript}
+    $('transcript').classList.add('show');$('transcriptText').textContent=(finalText+i2).trim()};
   recog.onend=()=>{if(recording){try{recog.start()}catch(e){}}};
 }
 $('micbtn').addEventListener('click',()=>{
   if(!SR){toast('Voice not supported here — just type');return}
-  if(!recording){finalText='';$('transcriptText').textContent='';
-    try{recog.start()}catch(e){}
+  if(!recording){finalText='';$('transcriptText').textContent='';try{recog.start()}catch(e){}
     recording=true;$('micbtn').classList.add('recording');$('micLabel').textContent='🔴 Listening… tap to stop';
   }else{recording=false;try{recog.stop()}catch(e){}
-    $('micbtn').classList.remove('recording');$('micLabel').textContent='🎤 Fill by voice instead';
-    setTimeout(()=>parseTranscript(finalText.trim()),350)}
+    $('micbtn').classList.remove('recording');$('micLabel').textContent='🎤 Fill by voice';
+    setTimeout(()=>parseVoice(finalText.trim()),350)}
 });
-
-/* ================= PARSER ================= */
-const BIZ_TYPES='barbers?|salons?|hair|beauty|cafe|caf[eé]|coffee|restaurant|bar|shop|store|studios?|spa|nails?|clinic|garage|bakery|tanning|tattoo|gym|florists?|butchers?|dental|opticians?|pharmacy|takeaway|kitchen|grill|lounge|boutique|deli';
-function parseTranscript(text){
+function grab(t,re){const m=t.match(re);return m?m[1].trim():''}
+function titleCase(s){return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1))}
+function parseVoice(text){
   if(!text){toast('Nothing captured');return}
   const t=' '+text.replace(/\s+/g,' ').trim()+' ';const lower=t.toLowerCase();
   let biz='';
-  const bm=t.match(/\b(?:spoke to|talked to|talked with|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|went (?:in ?)?to|at|with|for|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
+  const bm=t.match(/\b(?:spoke to|talked to|sold (?:a[^,]*?|an?)?\s*(?:plate|stand|to)?|visited|at|with|to)\s+((?:[A-Z][A-Za-z0-9'&]*\s*){1,5}?)\s+(?:in|on|,|\.|and\b|they|she|he|who|gave|was|were|is|are)\b/);
   if(bm)biz=bm[1].trim();
-  if(!biz||biz.split(' ').length>5){
-    const ty=t.match(new RegExp('((?:[A-Z][A-Za-z0-9\'&]*\\s+){0,4}(?:'+BIZ_TYPES+'))','i'));
-    if(ty)biz=ty[1].trim();
-  }
+  if(!biz||biz.split(' ').length>5){const ty=t.match(new RegExp('((?:[A-Z][A-Za-z0-9\'&]*\\s+){0,4}(?:'+BIZ_TYPES+'))','i'));if(ty)biz=ty[1].trim();}
   biz=biz.replace(/^(?:a|an|the|to|some|get)\s+/i,'').trim();
   if(biz)$('f_biz').value=titleCase(biz);
-
-  const person=grab(t,/\b(?:spoke to|talked to|talked with|spoke with|saw|met)\s+([A-Z][a-z]+)/i);
-  if(person)$('f_spoke').value=person;
-  const own=grab(t,/\b([A-Z][a-z]+)\s+(?:the\s+)?owner\b/i)||grab(t,/\bowner\s+(?:is|was|named|called)?\s*([A-Z][a-z]+)/i);
-  if(/\bowner\b/i.test(lower))$('f_owner').value=(own||person||'')+' (owner)';
-  else if(person)$('f_owner').value=person;
-
-  const tm=t.match(/\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue|Green|Broadway))?)/);
+  const person=grab(t,/\b(?:spoke to|talked to|met|saw)\s+([A-Z][a-z]+)/i);
+  if(person)$('f_owner').value=/\bowner\b/i.test(lower)?person+' (owner)':person;
+  const tm=t.match(/\b(?:in|on)\s+([A-Z][a-z]+(?:\s+(?:Road|Street|High Street|Lane|Avenue))?)/);
   if(tm&&!new RegExp('^(?:'+BIZ_TYPES+')$','i').test(tm[1]))$('f_town').value=tm[1];
-
-  const ph=grab(t,/(0\s?7[\d\s]{9,13})/);
-  if(ph)$('f_phone').value=ph.replace(/\s+/g,'');
-  else if(/(?:her|his|their|the)\s+number|gave me (?:a|the|her|his)?\s*number/i.test(lower))
-    $('f_phone').placeholder='They gave a number — type it';
-
+  const ph=grab(t,/(0\s?7[\d\s]{9,13})/);if(ph)$('f_phone').value=ph.replace(/\s+/g,'');
+  // note = the sentiment sentence
   const sig=[];
-  [[/too expensive|bit expensive|pricey/,'Thinks it\u2019s too expensive'],
-   [/think about it|have a think|need to think/,'Wants to think about it'],
-   [/not sure/,'Not sure yet'],[/already (?:have|got)/,'Says they already have one'],
-   [/not interested|no thanks/,'Not interested'],
-   [/call back|come back|pop back|another time|catch (?:me|us) later/,'Come back another time'],
-   [/busy/,'Was busy'],[/loyalty cards?/,'Interested in loyalty cards'],
-   [/review plate|google review/,'Interested in review plate'],
-   [/booking|booksy|fresha/,'Interested re: booking links'],
-   [/owner (?:is )?(?:not|isn'?t) (?:back|in|around)|not back until/,'Owner away — wait']
-  ].forEach(([re,l])=>{if(re.test(lower))sig.push(l)});
-  if(/interested|keen|likes? it|loves? it|want (?:one|it|some)|sold/.test(lower)&&!/not interested/.test(lower))sig.unshift('Interested');
-  $('f_said').value=[...new Set(sig)].join('; ');
-
-  let chan='',act='';
-  if(/text|sms/.test(lower)&&!/instagram|insta/.test(lower)){chan='Text';act='Text over the info'}
-  if(/instagram|insta|dm them/.test(lower)){chan='Instagram';act='Message on Instagram'}
-  else if(/\bemail\b/.test(lower)){chan='Email';act='Email over the info'}
-  else if(/\bcall\b|ring/.test(lower)){chan='Call';act='Call them'}
-  else if(/pop back|go back|visit|come back/.test(lower)){chan='Visit';act='Pop back in'}
-  if(!chan&&/send (?:over|them)?\s*(?:some )?(?:info|information|details)/.test(lower))act='Send over some information';
-  if(chan)selChan(chan);
-  if(act)$('f_next').value=act;
-
-  let d=null;
-  if(/today/.test(lower))d=0;else if(/tomorrow/.test(lower))d=1;
-  else if(/monday/.test(lower))d=nextDow(1);else if(/tuesday/.test(lower))d=nextDow(2);
-  else if(/wednesday/.test(lower))d=nextDow(3);else if(/thursday/.test(lower))d=nextDow(4);
-  else if(/friday/.test(lower))d=nextDow(5);else if(/saturday/.test(lower))d=nextDow(6);
-  else if(/next week/.test(lower))d=7;else if(/two weeks|fortnight/.test(lower))d=14;
-  else if(/couple of days|two days|few days/.test(lower))d=2;
-  if(d!=null)setWhenDays(d);
-
+  [[/too expensive|pricey/,'Thinks too expensive'],[/think about it|have a think/,'Wants to think about it'],
+   [/not interested|no thanks/,'Not interested'],[/busy/,'Was busy'],[/interested|keen/,'Interested'],
+   [/loyalty/,'Interested in loyalty cards']].forEach(([re,l])=>{if(re.test(lower))sig.push(l)});
+  if(sig.length)$('f_note').value=[...new Set(sig)].join('; ');
   // product
-  if(/multi-?link/.test(lower))selProduct('Multi-Link');
-  else if(/white google/.test(lower))selProduct('White Google');
-  else if(/black google/.test(lower))selProduct('Black Google');
-  else if(/blue google/.test(lower))selProduct('Blue Google');
-
-  const miss=[];if(!$('f_biz').value)miss.push('business');if(!$('f_town').value)miss.push('town');
-  toast(miss.length?'Filled in — check '+miss.join(' & '):'Filled in — check & save');
+  if(/multi-?link/.test(lower))setProd('Multi-Link');
+  else if(/white google/.test(lower))setProd('White Google');
+  else if(/black google/.test(lower))setProd('Black Google');
+  else if(/blue google/.test(lower))setProd('Blue Google');
+  toast('Filled in — check & save');
 }
-function grab(t,re){const m=t.match(re);return m?m[1].trim():''}
-function titleCase(s){return s.replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1))}
-function nextDow(t){const n=new Date().getDay();let d=(t-n+7)%7;if(d===0)d=7;return d}
+function setProd(p){pickProduct=p;document.querySelectorAll('#prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===p))}
 
-/* ================= CHIPS ================= */
-let selectedProduct='';
-document.querySelectorAll('#chanChips .chip').forEach(c=>c.addEventListener('click',()=>selChan(c.dataset.ch)));
-function selChan(ch){selectedChan=ch;
-  document.querySelectorAll('#chanChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.ch===ch))}
-document.querySelectorAll('#prodChips .chip').forEach(c=>c.addEventListener('click',()=>selProduct(c.dataset.prod)));
-function selProduct(p){selectedProduct=p;
-  document.querySelectorAll('#prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===p))}
-document.querySelectorAll('#whenChips .chip').forEach(c=>c.addEventListener('click',()=>setWhenDays(parseInt(c.dataset.days))));
-function setWhenDays(days){selectedDays=days;
-  const d=new Date();d.setDate(d.getDate()+days);$('f_when').value=isoOf(d);
-  document.querySelectorAll('#whenChips .chip').forEach(c=>c.classList.toggle('on',parseInt(c.dataset.days)===days))}
-
-/* ================= SAVE ================= */
-$('saveBtn').addEventListener('click',()=>{
-  const biz=$('f_biz').value.trim();
-  if(!biz){toast('Add a business name');$('f_biz').focus();return}
-  const firstDate=$('f_when').value||isoOf(new Date());
-  const lead={id:Date.now(),biz,town:$('f_town').value.trim(),spoke:$('f_spoke').value.trim(),
-    owner:$('f_owner').value.trim(),phone:$('f_phone').value.trim(),
-    email:$('f_email').value.trim(),insta:$('f_insta').value.trim().replace(/^@/,''),
-    product:selectedProduct||'Multi-Link',
-    said:$('f_said').value.trim(),next:$('f_next').value.trim(),channel:selectedChan,
-    when:firstDate, pitchDate:firstDate, created:new Date().toISOString(),
-    stage:0,dead:false,replied:false,lastContact:''};
-  const a=store.all();a.unshift(lead);store.save(a);
-  pushToSheet(lead);
-  clearForm();render();toast('Saved ✓');
-  switchView('today');
-});
-$('clearBtn').addEventListener('click',clearForm);
-function clearForm(){
-  ['f_biz','f_town','f_spoke','f_owner','f_phone','f_email','f_insta','f_said','f_next','f_when']
-    .forEach(id=>{$(id).value='';});
-  $('f_phone').placeholder='07…';
-  selectedChan='';selectedDays=null;selectedProduct='';
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  $('transcript').classList.remove('show');$('transcriptText').textContent='';
-  $('micLabel').textContent='🎤 Fill by voice instead';
-}
-
-/* ================= MESSAGE FILL ================= */
-function fill(str,l){
-  const name=(l.owner||l.spoke||'there').replace(/\s*\(owner\)\s*/i,'').trim()||'there';
-  return str.replace(/{name}/g,name).replace(/{business}/g,l.biz||'your shop')
-            .replace(/{town}/g,l.town||'').replace(/{link}/g,linkForLead(l));
-}
-/* the message for a lead = the funnel entry at its current stage */
-function messageFor(l){
-  const F=funnel();const st=Math.min(l.stage||0,F.length-1);
-  return fill(F[st].msg,l);
-}
-function telLink(p){return 'tel:'+p}
-function smsLink(l){
-  const body=encodeURIComponent(messageFor(l));
-  const sep=/iPhone|iPad|Macintosh/.test(navigator.userAgent)?'&':'?';
-  return 'sms:'+(l.phone||'')+sep+'body='+body;
-}
-function mailLink(l){
-  return 'mailto:'+(l.email||'')+'?subject='+encodeURIComponent(fill(emailSubject(),l))
-    +'&body='+encodeURIComponent(messageFor(l));
-}
-
-/* ================= ACTIONS ================= */
-window.markReplied=function(id){
-  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
-  l.replied=!l.replied;                       // toggle — stays in the list either way
-  if(l.replied)l.repliedAt=new Date().toISOString();
-  store.save(a);pushToSheet(l);render();
-  toast(l.replied?'Marked replied — still in your list ✓':'Reply mark removed');
-};
-window.noResponse=function(id){
-  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
-  const r=advanceNoResponse(l);
-  store.save(a);pushToSheet(l);render();
-  toast(r==='dead'?'Moved to no longer chasing':'Chase set for '+
-    new Date(l.when+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
-};
-window.killLead=function(id){
-  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
-  l.dead=true;l.when='';store.save(a);pushToSheet(l);render();toast('Stopped chasing');
-};
-window.snooze=function(id,days){
-  const a=store.all();const l=a.find(x=>x.id===id);if(!l)return;
-  l.when=isoOf(addBusinessDays(new Date(),days));store.save(a);pushToSheet(l);render();
-  toast('Pushed to '+new Date(l.when+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
-};
-
-/* ================= RENDER ================= */
-function fmtWhen(w,dead){
-  if(dead)return{label:'Dead',cls:'dead'};
-  if(!w)return{label:'No date',cls:''};
-  const t=new Date();t.setHours(0,0,0,0);
-  const d=new Date(w+'T00:00:00');const diff=Math.round((d-t)/86400000);
-  if(diff<0)return{label:'Overdue',cls:'overdue'};
-  if(diff===0)return{label:'Today',cls:'due'};
-  if(diff===1)return{label:'Tomorrow',cls:'due'};
-  if(diff<7)return{label:d.toLocaleDateString('en-GB',{weekday:'short'}),cls:''};
-  return{label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),cls:''};
-}
-function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-
-function leadCard(l,showActions){
-  const w=fmtWhen(l.when,l.dead);
-  const name=esc(l.owner||l.spoke||'');
-  const hasP=!!l.phone,hasE=!!l.email,hasI=!!l.insta;
-  const since=daysSinceFirst(l);
-  return `<div class="lead ${w.cls}${l.dead?' dead':''}">
-    <div class="top">
-      <div><div class="biz">${esc(l.biz)}${l.replied?'<span class="rbadge">Replied</span>':''}</div>
-      <div class="town">${esc(l.town||'')}${l.product?' · '+esc(l.product):''}</div></div>
-      <div class="when ${w.cls}">${w.label}</div>
-    </div>
-    ${name?`<div class="meta"><b>${name}</b>${l.phone?' · '+esc(l.phone):''}</div>`:''}
-    ${l.said?`<div class="said">"${esc(l.said)}"</div>`:''}
-    ${l.next?`<div class="next">→ ${esc(l.next)}</div>`:''}
-    <div class="stagebar">${stageLabel(l)}${since?' · '+since:''}</div>
-    ${showActions&&!l.dead?`
-    <div class="contactrow">
-      ${hasP?`<a class="cbtn text" href="${smsLink(l)}">Text</a>`:`<span class="cbtn off">No number</span>`}
-      ${hasE?`<a class="cbtn email" href="${mailLink(l)}">Email</a>`:`<span class="cbtn off">No email</span>`}
-      ${hasI?`<button class="cbtn insta" onclick="instaOpen(${l.id})">Instagram</button>`:`<span class="cbtn off">No Insta</span>`}
-    </div>
-    <div class="resprow">
-      <button class="rbtn r-replied${l.replied?' active':''}" onclick="markReplied(${l.id})">Replied ✓</button>
-      <button class="rbtn r-noresp" onclick="noResponse(${l.id})">No response</button>
-      <button class="rbtn r-stop" onclick="killLead(${l.id})">Stop</button>
-    </div>
-    <button class="editbtn" onclick="openEdit(${l.id})">Edit details</button>`:
-    (l.dead?`<button class="editbtn" onclick="openEdit(${l.id})">Edit / reopen</button>`:'')}
-  </div>`;
-}
-/* instaOpen needs the lead object */
-window.instaOpen=function(id){
-  const l=store.all().find(x=>x.id===id);if(!l)return;
-  const msg=messageFor(l);
-  if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});
-  toast('Message copied — paste in the DM');
-  const h=(l.insta||'').replace(/^@/,'');
-  window.open(h?'https://instagram.com/'+h:'https://instagram.com','_blank');
-};
-
-function render(){
-  const all=store.all();
-  const open=all.filter(x=>!x.dead);
-  const today=new Date();today.setHours(0,0,0,0);
-  const due=open.filter(l=>l.when&&new Date(l.when+'T00:00:00')<=today);
-  due.sort((a,b)=>(a.when||'').localeCompare(b.when||''));
-
-  $('count').textContent=open.length;
-  $('bToday').textContent=due.length;
-  $('bAll').textContent=all.length;
-  $('statDue').textContent=due.length;
-  $('statOpen').textContent=open.length;
-
-  $('todayList').innerHTML=due.length?due.map(l=>leadCard(l,true)).join(''):
-    '<div class="empty">Nothing due today.<br>Enjoy it — or log a new lead ↑</div>';
-
-  const sorted=all.slice().sort((a,b)=>{
-    if(a.dead!==b.dead)return a.dead?1:-1;
-    return (a.when||'9999').localeCompare(b.when||'9999')});
-  $('allList').innerHTML=sorted.length?sorted.map(l=>leadCard(l,true)).join(''):
-    '<div class="empty">No leads yet.</div>';
-
-  const b=$('reminderBanner');
-  if(due.length){b.classList.add('show');
-    $('reminderText').textContent=due.length+' to contact today';}
-  else b.classList.remove('show');
-}
-
-/* ================= VIEWS ================= */
-function switchView(v){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
-  $('v-'+v).classList.add('on');
-  if(v==='outreach')renderOutreach();
-  window.scrollTo(0,0);
-}
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
-
-/* ================= EDIT LEAD ================= */
-let editingId=null, editProduct='';
-window.openEdit=function(id){
-  const l=store.all().find(x=>x.id===id);if(!l)return;
-  editingId=id;
-  $('e_biz').value=l.biz||'';$('e_town').value=l.town||'';$('e_phone').value=l.phone||'';
-  $('e_spoke').value=l.spoke||'';$('e_owner').value=l.owner||'';$('e_email').value=l.email||'';
-  $('e_insta').value=l.insta||'';$('e_said').value=l.said||'';$('e_next').value=l.next||'';
-  $('e_pitch').value=l.pitchDate||l.when||'';
-  editProduct=l.product||'';
-  document.querySelectorAll('#e_prodChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.prod===editProduct));
-  $('editReopen').style.display=l.dead?'block':'none';
-  $('editModal').classList.add('on');
-};
-document.querySelectorAll('#e_prodChips .chip').forEach(c=>c.addEventListener('click',()=>{
-  editProduct=c.dataset.prod;
-  document.querySelectorAll('#e_prodChips .chip').forEach(x=>x.classList.toggle('on',x.dataset.prod===editProduct));
-}));
-$('editClose').addEventListener('click',()=>$('editModal').classList.remove('on'));
-$('editSave').addEventListener('click',()=>{
-  const a=store.all();const l=a.find(x=>x.id===editingId);if(!l)return;
-  l.biz=$('e_biz').value.trim();l.town=$('e_town').value.trim();l.phone=$('e_phone').value.trim();
-  l.spoke=$('e_spoke').value.trim();l.owner=$('e_owner').value.trim();l.email=$('e_email').value.trim();
-  l.insta=$('e_insta').value.trim().replace(/^@/,'');l.said=$('e_said').value.trim();
-  l.next=$('e_next').value.trim();l.product=editProduct||l.product||'Multi-Link';
-  // if pitch date changed, re-anchor the current stage's due date
-  const newPitch=$('e_pitch').value;
-  if(newPitch && newPitch!==l.pitchDate){
-    l.pitchDate=newPitch;
-    const F=funnel();const st=l.stage||0;
-    if(!l.dead) l.when=isoOf(addDays(new Date(newPitch+'T00:00:00'),F[st].offset));
-  }
-  store.save(a);pushToSheet(l);$('editModal').classList.remove('on');render();toast('Lead updated ✓');
-});
-$('editReopen').addEventListener('click',()=>{
-  const a=store.all();const l=a.find(x=>x.id===editingId);if(!l)return;
-  l.dead=false;
-  const F=funnel();const st=l.stage||0;
-  const pitch=l.pitchDate?new Date(l.pitchDate+'T00:00:00'):new Date();
-  l.when=isoOf(addDays(pitch,F[st].offset));
-  store.save(a);pushToSheet(l);$('editModal').classList.remove('on');render();toast('Reopened ✓');
-});
-
-/* ================= TEMPLATES / SEQUENCE ================= */
-$('tplBtn').addEventListener('click',()=>{
-  const F=funnel();
-  $('t_emailsub').value=emailSubject();
-  $('t_c0').value=F[0].msg;$('t_c1').value=F[1].msg;
-  $('t_c2').value=F[2].msg;$('t_c3').value=F[3].msg;
-  $('tplModal').classList.add('on');
-});
-$('tplClose').addEventListener('click',()=>$('tplModal').classList.remove('on'));
-$('tplSave').addEventListener('click',()=>{
-  const c=cfg.get();
-  c.emailsub=$('t_emailsub').value;
-  // preserve the offsets/names, only swap the message text
-  c.funnel=FUNNEL.map((f,i)=>Object.assign({},f,{msg:$('t_c'+i).value}));
-  cfg.set(c);$('tplModal').classList.remove('on');render();toast('Sequence saved ✓');
-});
-
-/* ================= SHEETS SYNC ================= */
-$('syncBtn').addEventListener('click',()=>{
-  $('sheetUrl').value=cfg.get().sheetUrl||'';
-  $('syncModal').classList.add('on');
-});
-$('syncClose').addEventListener('click',()=>$('syncModal').classList.remove('on'));
-$('syncSave').addEventListener('click',()=>{
-  const c=cfg.get();c.sheetUrl=$('sheetUrl').value.trim();cfg.set(c);
-  updateSyncNote();
-  if(c.sheetUrl){pushToSheet({id:'test',biz:'TapMate test row',town:'',owner:'',phone:'',
-    email:'',said:'connection test',next:'',channel:'',when:'',stage:0,dead:false,done:false,
-    created:new Date().toISOString()});toast('Saved — check your sheet for a test row');}
-  else toast('URL cleared');
-  $('syncModal').classList.remove('on');
-});
-$('syncAll').addEventListener('click',()=>{
-  const url=cfg.get().sheetUrl;
-  if(!url){toast('Add your Apps Script URL first');return}
-  const a=store.all();a.forEach(l=>pushToSheet(l));
-  toast('Pushed '+a.length+' leads');
-});
-function pushToSheet(lead){
-  const url=cfg.get().sheetUrl;if(!url)return;
-  try{
-    fetch(url,{method:'POST',mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(lead)}).catch(()=>{});
-  }catch(e){}
-}
-function updateSyncNote(){
-  const u=cfg.get().sheetUrl;
-  $('syncNote').textContent=u?'Connected. Every save and update also writes to your sheet.':
-    'Not connected. Tap “Back up to Google Sheets” to set it up, or use Export CSV any time.';
-}
-
-/* ================= EXPORT ================= */
-$('exportBtn').addEventListener('click',()=>{
-  const a=store.all();
-  if(!a.length){toast('Nothing to export');return}
-  const cols=['Business','Town','Spoke to','Owner/DM','Phone','Email','Instagram','What they said',
-    'Next action','Channel','Follow-up date','Stage','Dead','Replied','Logged'];
-  const rows=a.map(l=>[l.biz,l.town,l.spoke,l.owner,l.phone,l.email,l.insta,l.said,l.next,
-    l.channel,l.when,stageLabel(l),l.dead?'Yes':'No',l.replied?'Yes':'No',
-    new Date(l.created).toLocaleString('en-GB')]);
-  const csv=[cols,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
-  const a2=document.createElement('a');a2.href=u;
-  a2.download='tapmate-leads-'+isoOf(new Date())+'.csv';a2.click();URL.revokeObjectURL(u);
-  toast('CSV exported');
-});
-
-/* ================= OUTREACH ================= */
-const oStore={
-  key:'tapmate_outreach_v1',
-  all(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
-  save(a){localStorage.setItem(this.key,JSON.stringify(a))}
-};
-const DEFAULT_OPENERS=[
-  "Hi, I hope you don't mind me messaging. I'm Jamie, 26 from Sheffield. At uni I started a project to help people get more reviews on Google and followers on social media. I was wondering if you'd be able to help me out by answering literally 3 quick one-word questions? It would really help, but I understand if you're busy and can't!",
-  "Hi! Hope you don't mind me messaging. I'm Jamie, 26 from Sheffield. At uni I started a little project helping businesses get more Google reviews and social followers. Could I ask you 3 quick one-word questions? Would really help me out — no worries at all if you're too busy!",
-  "Hi, hope it's okay to message! I'm Jamie, 26 from Sheffield. Bit of a random one — at uni I started a project helping businesses get more reviews and followers, and I'm trying to learn from actual owners. Could I ask you 3 quick one-word questions? Totally fine if not!"
-];
-const DEFAULT_QUESTIONS="Amazing, thank you! Here they are:\n\n1. Which do you care more about — social media followers or Google reviews?\n2. Do you actively ask customers to follow or review you?\n3. Do you reckon this is something businesses would pay a small amount monthly for, or would they only ever pay once?";
-
-/* Cold chase ladder: offsets are days AFTER the previous message.
-   chase 1 = 1 day after initial, chase 2 = 3 days after chase 1,
-   chase 3 (breakup) = 7 days after chase 2, then done. */
-const COLD_LADDER=[
-  {name:'Chase 1', gap:1,
-   msg:"Hi! Just floating this back up in case it got buried 😊 No worries if now's not a good time — even a one-word answer to those 3 questions would really help me out!"},
-  {name:'Chase 2', gap:3,
-   msg:"Hey, sorry to nudge again! I know you're busy. If it's easier I can just send over what I do in one message — or if it's not for you, totally fine to say so!"},
-  {name:'Breakup', gap:7,
-   msg:"No worries at all — I'll leave it here so I'm not clogging up your inbox! If you ever want to get more reviews or followers down the line, I'm only a message away. Wishing you and the business all the best 🙌"}
-];
-function coldChases(){ const c=cfg.get(); return (c.coldChases&&c.coldChases.length===3)?c.coldChases:COLD_LADDER; }
-
-/* Text & Email openers: recipient has NO context, so these introduce TapMate + links. */
-const DEFAULT_TEXT_OPENER="Hi, hope you don't mind me texting! I'm Jamie, 26 from Sheffield — I run TapMate, we help local businesses get more Google reviews and social followers with a simple tap plate. You can see what we do at www.tapmate.net or @tapmateuk on Instagram. Would you be up for answering 3 quick one-word questions? Would really help me out — no worries if you're busy!";
-const DEFAULT_EMAIL_OPENER="Hi,\n\nHope you don't mind me getting in touch! I'm Jamie, 26 from Sheffield, and I run a little business called TapMate. We help local businesses get more Google reviews and social media followers using a simple NFC tap plate — one tap and a customer can leave you a review, follow you, or find your details.\n\nYou can see what we do here:\nWebsite: www.tapmate.net\nInstagram: www.instagram.com/tapmateuk\n\nI'm trying to learn from actual business owners, so — would you be up for answering 3 quick one-word questions? It would genuinely help me a lot, and totally fine if you're too busy.\n\nThanks so much,\nJamie — TapMate";
-const DEFAULT_EMAIL_SUBJECT="A quick hello from TapMate 👋";
-
-function openers(){ const c=cfg.get(); return (c.openers&&c.openers.length===3)?c.openers:DEFAULT_OPENERS; }
-function textOpener(){ return cfg.get().textOpener || DEFAULT_TEXT_OPENER; }
-function emailOpener(){ return cfg.get().emailOpener || DEFAULT_EMAIL_OPENER; }
-function coldEmailSubject(){ return cfg.get().coldEmailSubject || DEFAULT_EMAIL_SUBJECT; }
-function questions(){ return cfg.get().questions || DEFAULT_QUESTIONS; }
-function dailyTarget(){ return cfg.get().outTarget || 20; }
-function todayStr(){ return isoOf(new Date()); }
-
-function oFill(str,p){
-  return str.replace(/{name}/g,'').replace(/{business}/g,p.biz||'')
-            .replace(/{category}/g,(p.cat||'').toLowerCase()).replace(/\s+\n/g,'\n').trim();
-}
-function openerFor(p){
-  const O=openers();const idx=(p.rot!=null?p.rot:0)%O.length;return oFill(O[idx],p);
-}
-
-function parseCSV(text){
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());
-  if(!lines.length)return [];
-  const delim=lines[0].includes('\t')?'\t':',';
-  const rows=lines.map(l=>l.split(delim));
-  const header=rows[0].map(h=>h.toLowerCase().trim());
-  const col=n=>header.findIndex(h=>h.includes(n));
-  const ci={biz:col('business'),addr:col('address'),cat:col('categor'),
-    ig:col('instagram'),phone:col('phone'),email:col('email'),web:col('website')};
-  const out=[];
-  for(let i=1;i<rows.length;i++){
-    const r=rows[i];const biz=(r[ci.biz]||'').trim();if(!biz)continue;
-    const ig=(ci.ig>=0?r[ci.ig]||'':'').trim();
-    const phone=(ci.phone>=0?r[ci.phone]||'':'').trim();
-    const email=(ci.email>=0?r[ci.email]||'':'').trim();
-    if(!ig&&!phone&&!email)continue;
-    out.push({biz,addr:(r[ci.addr]||'').trim(),cat:(r[ci.cat]||'').trim(),
-      ig,phone,email,web:(ci.web>=0?r[ci.web]||'':'').trim()});
-  }
-  return out;
-}
-function importProspects(text){
-  const parsed=parseCSV(text);const existing=oStore.all();
-  const seen=new Set(existing.map(p=>(p.biz+'|'+p.ig).toLowerCase()));
-  let added=0;
-  parsed.forEach(p=>{
-    const kkey=(p.biz+'|'+p.ig).toLowerCase();
-    if(seen.has(kkey))return;seen.add(kkey);
-    existing.push({id:Date.now()+''+Math.floor(Math.random()*1e6),
-      biz:p.biz,name:'',cat:p.cat,addr:p.addr,
-      ig:p.ig.replace(/\/$/,''),phone:p.phone,email:p.email,web:p.web,
-      group: p.ig ? (Math.random()<0.5?'comment':'dm') : 'none',  // A/B only for IG-reachable
-      rot:Math.floor(Math.random()*3),
-      status:'new',commented:false,assignedDate:'',sentDate:'',repliedAt:''});
-    added++;
-  });
-  oStore.save(existing);
-  return {added,total:parsed.length,skipped:parsed.length-added};
-}
-function todaysBatch(){
-  const all=oStore.all();const today=todayStr();
-  // Anything still 'new' AND already assigned (from today or a previous day) stays in the batch —
-  // uncontacted leads roll over instead of being stranded.
-  let batch=all.filter(p=>p.status==='new'&&p.assignedDate);
-  if(batch.length<dailyTarget()){
-    const need=dailyTarget()-batch.length;
-    const pool=all.filter(p=>p.status==='new'&&!p.assignedDate);
-    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
-    pool.slice(0,need).forEach(p=>{p.assignedDate=today;batch.push(p);});
-    oStore.save(all);
-  }
-  return batch;
-}
-function renderOutreach(){
-  const all=oStore.all();
-  const today=todayStr();const tD=new Date(today+'T00:00:00');
-  const batch=todaysBatch();const target=dailyTarget();
-  // "done today" = leads whose first message was sent today
-  const sentToday=all.filter(p=>p.sentDate===today).length;
-  const pct=target?Math.min(100,Math.round(sentToday/target*100)):0;
-  $('outProgBar').style.width=pct+'%';
-  $('outProgTxt').textContent=sentToday+' / '+target;
-  const neverContacted=all.filter(p=>p.status==='new').length;
-  $('bOut').textContent=neverContacted;
-
-  // 1) Chases due today or overdue
-  const chaseDue=all.filter(p=>p.status==='chasing'&&p.nextChase&&new Date(p.nextChase+'T00:00:00')<=tD);
-  chaseDue.sort((a,b)=>(a.nextChase||'').localeCompare(b.nextChase||''));
-  if(chaseDue.length){
-    $('outChaseSec').style.display='block';
-    $('outChaseList').innerHTML=chaseDue.map(p=>oCard(p,'chase')).join('');
-  } else $('outChaseSec').style.display='none';
-
-  // 2) Replied — awaiting your action
-  const replied=all.filter(p=>p.status==='replied');
-  if(replied.length){
-    $('outReplySec').style.display='block';
-    $('outReplyList').innerHTML=replied.map(p=>oCard(p,'replied')).join('');
-  } else $('outReplySec').style.display='none';
-
-  // 3) Daily batch (rolls over uncontacted; tops up to target)
-  const remaining=batch.filter(p=>p.status==='new');
-  const list=$('outList');
-  const totalLeft=all.filter(p=>p.status==='new').length;
-  const secHead=$('outBatchHead');
-  if(secHead)secHead.textContent=totalLeft+' left to contact';
-  if(!all.length){list.innerHTML='<div class="empty">No prospects yet.<br>Tap “Import CSV” above to load your list ↑</div>';return;}
-  if(!remaining.length){list.innerHTML='<div class="empty">Nothing waiting to contact 🎉<br>Import more, or work any chases due above.</div>';return;}
-  list.innerHTML=remaining.map(p=>oCard(p,'new')).join('');
-}
-function igUrlOf(p){
-  const h=(p.ig||'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,'').replace(/^@/,'');
-  return p.ig?(p.ig.startsWith('http')?p.ig:'https://instagram.com/'+h):'';
-}
-function oCard(p,mode){
-  const igUrl=igUrlOf(p);
-  const phoneClean=(p.phone||'').replace(/\s/g,'');
-  const L=coldChases();
-
-  // header badge depends on mode
-  let badge='';
-  if(mode==='new'){
-    if(p.group==='comment')badge='<span class="obadge comment">Comment first</span>';
-    else if(p.group==='dm')badge='<span class="obadge dm">DM only</span>';
-    // group 'none' (no Instagram) gets no A/B badge
-  }
-  else if(mode==='chase'){const cs=L[p.cstage||0];badge='<span class="obadge comment">'+cs.name+'</span>';}
-  else if(mode==='replied')badge='<span class="obadge done">Replied</span>';
-
-  // messages per channel
-  const igMsg  = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : openerFor(p);
-  const txtMsg = mode==='chase' ? oFill(L[p.cstage||0].msg,p) : textOpener();
-  const emlBody= mode==='chase' ? oFill(L[p.cstage||0].msg,p) : emailOpener();
-  const emlSub = coldEmailSubject();
-  const smsSep = /iPhone|iPad|Macintosh/.test(navigator.userAgent)?'&':'?';
-
-  // contact buttons — each opens its own channel-appropriate message
-  const contacts=`<div class="contactrow">
-    ${igUrl?`<button class="cbtn insta" onclick="oInsta('${p.id}','${mode}')">Instagram</button>`:`<span class="cbtn off">No Insta</span>`}
-    ${phoneClean?`<a class="cbtn text" href="sms:${phoneClean}${smsSep}body=${encodeURIComponent(txtMsg)}">Text</a>`:`<span class="cbtn off">No number</span>`}
-    ${p.email?`<a class="cbtn email" href="mailto:${p.email}?subject=${encodeURIComponent(emlSub)}&body=${encodeURIComponent(emlBody)}">Email</a>`:`<span class="cbtn off">No email</span>`}
-  </div>`;
-
-  // action row depends on mode
-  let actions='';
-  if(mode==='new'){
-    actions=`<div class="resprow">
-      <button class="rbtn r-replied" onclick="oReplied('${p.id}')">Replied ✓</button>
-      <button class="rbtn r-noresp" onclick="oDone('${p.id}')">Sent</button>
-      <button class="rbtn r-stop" onclick="oSkip('${p.id}')">Skip</button>
-    </div>`;
-  } else if(mode==='chase'){
-    const isBreakup=(p.cstage||0)>=L.length-1;
-    actions=`<div class="resprow">
-      <button class="rbtn r-replied" onclick="oReplied('${p.id}')">Replied ✓</button>
-      <button class="rbtn r-noresp" onclick="oChaseSent('${p.id}')">${isBreakup?'Breakup sent':'Chase sent'}</button>
-      <button class="rbtn r-stop" onclick="oNotInterested('${p.id}')">Not interested</button>
-    </div>`;
-  } else if(mode==='replied'){
-    actions=`<div class="resprow">
-      <button class="rbtn r-replied" onclick="oComplete('${p.id}')">Complete ✓</button>
-      <button class="rbtn r-stop" onclick="oNotInterested('${p.id}')">Not interested</button>
-    </div>`;
-  }
-
-  // context line
-  let ctx='';
-  if(mode==='new'&&p.group==='comment')ctx=`<div class="stagebar" style="color:#5b4fb0">💬 Leave a genuine comment on a recent post first, then DM</div>`;
-  else if(mode==='chase')ctx=`<div class="stagebar" style="color:#5b4fb0">Tap Instagram to copy the ${L[p.cstage||0].name.toLowerCase()} message & open their profile</div>`;
-  else if(mode==='replied')ctx=`<div class="stagebar" style="color:#1d6647">They replied — send your pitch, then mark Complete or Not interested</div>`;
-
-  return `<div class="lead">
-    <div class="top"><div><div class="biz">${esc(p.biz)}${badge}</div>
-      <div class="town">${esc(p.cat||'')}${p.addr?' · '+esc(p.addr):''}</div></div></div>
-    ${ctx}
-    ${contacts}
-    ${actions}
-  </div>`;
-}
-window.oInsta=function(id,mode){
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  const L=coldChases();
-  const msg=(mode==='chase')?oFill(L[p.cstage||0].msg,p):openerFor(p);
-  if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});
-  toast('Message copied — paste in the DM');
-  window.open(igUrlOf(p)||'https://instagram.com','_blank');
-};
-window.oDone=function(id){  // "Sent" — enters the chase ladder
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  p.status='chasing';p.cstage=0;p.sentDate=todayStr();p.lastMsg=todayStr();
-  const L=coldChases();
-  p.nextChase=isoOf(addDays(new Date(),L[0].gap));
-  oStore.save(all);renderOutreach();
-  toast('Sent — chase 1 set for '+new Date(p.nextChase+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}));
-};
-window.oChaseSent=function(id){  // advance to next chase after sending a chase
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  const L=coldChases();const cur=(p.cstage||0);
-  p.lastMsg=todayStr();
-  if(cur>=L.length-1){ p.status='nochase';p.nextChase=''; toast('Breakup sent — done chasing'); }
-  else { p.cstage=cur+1; p.nextChase=isoOf(addDays(new Date(),L[cur+1].gap)); 
-    toast('Chase sent — next set for '+new Date(p.nextChase+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})); }
-  oStore.save(all);renderOutreach();
-};
-window.oReplied=function(id){
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  p.status='replied';p.repliedAt=new Date().toISOString();if(!p.sentDate)p.sentDate=todayStr();
-  p.nextChase='';  // stop auto-chasing once they reply
-  oStore.save(all);renderOutreach();toast('Replied — logged for A/B stats ✓');
-};
-window.oComplete=function(id){
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  p.status='complete';p.nextChase='';oStore.save(all);renderOutreach();toast('Marked complete ✓');
-};
-window.oNotInterested=function(id){
-  const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  p.status='notinterested';p.nextChase='';oStore.save(all);renderOutreach();toast('Marked not interested');
-};
-window.oSkip=function(id){const all=oStore.all();const p=all.find(x=>String(x.id)===String(id));if(!p)return;
-  p.status='skipped';p.skipped=true;oStore.save(all);renderOutreach();toast('Skipped');};
-
-$('outImportBtn').addEventListener('click',()=>{$('outImportResult').style.display='none';$('outImportModal').classList.add('on');});
-$('outImportClose').addEventListener('click',()=>$('outImportModal').classList.remove('on'));
-$('outFile').addEventListener('change',e=>{
-  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{const res=importProspects(rd.result);const el=$('outImportResult');el.style.display='block';
-    el.textContent=`Added ${res.added} new prospect${res.added===1?'':'s'}`+(res.skipped>0?` · skipped ${res.skipped} (duplicate or no contact method)`:'')+'.';
-    renderOutreach();};
-  rd.readAsText(f);
-});
-$('outClearAll').addEventListener('click',()=>{if(confirm('Delete ALL outreach prospects? This cannot be undone.')){oStore.save([]);renderOutreach();$('outImportModal').classList.remove('on');toast('Cleared');}});
-$('outSettingsBtn').addEventListener('click',()=>{$('outTarget').value=dailyTarget();$('outSettingsModal').classList.add('on');});
-$('outSettingsClose').addEventListener('click',()=>$('outSettingsModal').classList.remove('on'));
-$('outTargetSave').addEventListener('click',()=>{const n=parseInt($('outTarget').value)||20;const c=cfg.get();c.outTarget=Math.max(5,Math.min(100,n));cfg.set(c);$('outSettingsModal').classList.remove('on');renderOutreach();toast('Target set to '+c.outTarget);});
-$('outMsgBtn').addEventListener('click',()=>{const O=openers();$('o_0').value=O[0];$('o_1').value=O[1];$('o_2').value=O[2];
-  $('o_text').value=textOpener();$('o_emailsub').value=coldEmailSubject();$('o_email').value=emailOpener();
-  $('o_q').value=questions();
-  const L=coldChases();$('o_ch0').value=L[0].msg;$('o_ch1').value=L[1].msg;$('o_ch2').value=L[2].msg;
-  $('outMsgModal').classList.add('on');});
-$('outMsgClose').addEventListener('click',()=>$('outMsgModal').classList.remove('on'));
-$('outMsgSave').addEventListener('click',()=>{const c=cfg.get();c.openers=[$('o_0').value,$('o_1').value,$('o_2').value];
-  c.textOpener=$('o_text').value;c.coldEmailSubject=$('o_emailsub').value;c.emailOpener=$('o_email').value;
-  c.questions=$('o_q').value;
-  c.coldChases=COLD_LADDER.map((x,i)=>Object.assign({},x,{msg:$('o_ch'+i).value}));
-  cfg.set(c);$('outMsgModal').classList.remove('on');toast('Messages saved ✓');});
-$('outStatsBtn').addEventListener('click',()=>{
-  const all=oStore.all();
-  const SENT=['chasing','nochase','replied','complete','notinterested'];
-  const grp=g=>{const sent=all.filter(p=>p.group===g&&SENT.includes(p.status));
-    const replied=all.filter(p=>p.group===g&&(p.status==='replied'||p.status==='complete'));
-    return {sent:sent.length,replied:replied.length,rate:sent.length?Math.round(replied.length/sent.length*100):0};};
-  const c=grp('comment'),d=grp('dm');
-  $('outStatsBody').innerHTML=`
-    <div class="lead" style="margin-bottom:10px"><div class="biz">💬 Comment first</div>
-      <div class="meta" style="margin-top:8px">${c.replied} replies from ${c.sent} sent</div>
-      <div style="font-size:28px;font-weight:800;color:#5b4fb0;margin-top:4px">${c.rate}%</div></div>
-    <div class="lead"><div class="biz">📩 DM only</div>
-      <div class="meta" style="margin-top:8px">${d.replied} replies from ${d.sent} sent</div>
-      <div style="font-size:28px;font-weight:800;color:#3f6ea5;margin-top:4px">${d.rate}%</div></div>
-    <div class="syncnote" style="margin-top:12px">${(c.sent<30||d.sent<30)?'Keep going — you need ~100 in each group before these numbers mean much.':(c.rate>d.rate+3?'Commenting is winning so far. Worth the effort.':d.rate>c.rate+3?'DM-only is doing as well or better — commenting may not be worth the time.':'Too close to call yet.')}</div>`;
-  $('outStatsModal').classList.add('on');
-});
-$('outStatsClose').addEventListener('click',()=>$('outStatsModal').classList.remove('on'));
-
-updateSyncNote();
-render();</script>
+/* ============ INIT ============ */
+migrate();
+go('dash');
+</script>
 </body>
 </html>
